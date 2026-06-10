@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Game Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #0d0d0d;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: -120px;
+      left: -120px;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(124, 58, 237, 0.25) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(13, 13, 13, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(124, 58, 237, 0.2);
+      padding: 0 32px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+    }
+
+    .nav-brand {
+      font-size: 1.5rem;
+      font-weight: 800;
+      background: linear-gradient(90deg, #7c3aed, #a78bfa, #c4b5fd);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
+    }
+
+    main {
+      position: relative;
+      z-index: 1;
+      padding: 40px 32px 60px;
+      display: flex;
+      flex-direction: column;
+      gap: 52px;
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      padding-left: 16px;
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    .section-count {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #888;
+      background: rgba(255, 255, 255, 0.07);
+      padding: 2px 10px;
+      border-radius: 999px;
+    }
+
+    .card-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      padding: 12px;
+    }
+
+    .card {
+      flex: 0 0 180px;
+      width: 180px;
+      height: 280px;
+      background: #1a1a1a;
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .card:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 0 1px rgba(124, 58, 237, 0.5), 0 8px 32px rgba(124, 58, 237, 0.45), 0 2px 8px rgba(0, 0, 0, 0.6);
+    }
+
+    .card-cover {
+      width: 100%;
+      height: 220px;
+      display: block;
+      flex-shrink: 0;
+    }
+
+    .card-footer {
+      flex: 1;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 4px;
+      background: #1a1a1a;
+    }
+
+    .card-title {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 4px;
+      letter-spacing: 0.3px;
+      width: fit-content;
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav>
+    <span class="nav-brand">🎮 Game Tracker</span>
+  </nav>
+
+  <main id="app"></main>
+
+  <script>
+    // ─────────────────────────────────────────────────────────────
+    // HOW TO ADD A NEW SECTION:
+    // 1. Add a new key to GAMES below (e.g. "playing")
+    // 2. Set label, icon, theme ("played"/"wishlist"/"bought" or any new key)
+    // 3. Add your games array with { name, cover } objects
+    // That's it — the page auto-renders the new section!
+    // ─────────────────────────────────────────────────────────────
+
+    const GAMES = {
+      played: {
+        label: "Played",
+        icon: "✅",
+        theme: "played",
+        games: [
+          { name: "God of War", cover: "https://upload.wikimedia.org/wikipedia/en/a/a7/God_of_War_4_cover.jpg" },
+          { name: "God of War Ragnarök", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/e/ee/God_of_War_Ragnar%C3%B6k_cover.jpg/250px-God_of_War_Ragnar%C3%B6k_cover.jpg" },
+          { name: "Marvel's Spider-Man", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/e/e1/Spider-Man_PS4_cover.jpg/250px-Spider-Man_PS4_cover.jpg" },
+          { name: "Spider-Man: Miles Morales", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/a/a3/Spider-Man_Miles_Morales.jpeg/250px-Spider-Man_Miles_Morales.jpeg" },
+          { name: "Marvel's Spider-Man 2", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/0/0f/SpiderMan2PS5BoxArt.jpeg/250px-SpiderMan2PS5BoxArt.jpeg" },
+          { name: "Hogwarts Legacy", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/f/fb/Hogwarts_legacyboxart.png/250px-Hogwarts_legacyboxart.png" },
+          { name: "Uncharted: Drake's Fortune", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/5/5b/Uncharted_Drake%27s_Fortune.jpg/250px-Uncharted_Drake%27s_Fortune.jpg" },
+          { name: "Uncharted 2: Among Thieves", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/7/7b/Uncharted_2_box_artwork.jpg/250px-Uncharted_2_box_artwork.jpg" },
+          { name: "Uncharted 3: Drake's Deception", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/0/02/Uncharted_3_Boxart.jpg/250px-Uncharted_3_Boxart.jpg" },
+          { name: "Uncharted 4: A Thief's End", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/1/1a/Uncharted_4_box_artwork.jpg/250px-Uncharted_4_box_artwork.jpg" },
+          { name: "Uncharted: The Lost Legacy", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/8/85/Uncharted_The_Lost_Legacy_box_artwork_%28fair_use%29.jpg/250px-Uncharted_The_Lost_Legacy_box_artwork_%28fair_use%29.jpg" },
+          { name: "Ghost of Tsushima", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/b/b6/Ghost_of_Tsushima.jpg/250px-Ghost_of_Tsushima.jpg" },
+          { name: "Red Dead Redemption 2", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/4/44/Red_Dead_Redemption_II.jpg/250px-Red_Dead_Redemption_II.jpg" },
+          { name: "Grand Theft Auto V", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/a/a5/Grand_Theft_Auto_V.png/250px-Grand_Theft_Auto_V.png" },
+          { name: "The Last of Us Part I", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/8/86/The_Last_of_Us_Part_I_cover.jpg/250px-The_Last_of_Us_Part_I_cover.jpg" },
+          { name: "The Last of Us Part II", cover: "https://upload.wikimedia.org/wikipedia/en/4/4f/TLOU_P2_Box_Art_2.png" },
+          { name: "Cyberpunk 2077", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/9/9f/Cyberpunk_2077_box_art.jpg/250px-Cyberpunk_2077_box_art.jpg" },
+          { name: "Detroit: Become Human", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/e/ee/Detroit_Become_Human.jpg/250px-Detroit_Become_Human.jpg" },
+          { name: "Resident Evil 2", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/f/fd/Resident_Evil_2_Remake.jpg/250px-Resident_Evil_2_Remake.jpg" },
+          { name: "Resident Evil 3", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/d/dc/Resident_Evil_3.jpg/250px-Resident_Evil_3.jpg" },
+          { name: "Resident Evil 4", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/d/df/Resident_Evil_4_remake_cover_art.jpg/250px-Resident_Evil_4_remake_cover_art.jpg" },
+          { name: "Tomb Raider", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/f/f1/TombRaider2013.jpg/250px-TombRaider2013.jpg" },
+        ]
+      },
+      wishlist: {
+        label: "Want to Play Released",
+        icon: "⭐",
+        theme: "wishlist",
+        games: [
+          { name: "007 First Light", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/2/2b/007_First_Light_%282026%29_cover.jpg/250px-007_First_Light_%282026%29_cover.jpg" },
+          { name: "Ghost of Yōtei", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/1/18/Ghost_of_Y%C5%8Dtei_cover_art.png/250px-Ghost_of_Y%C5%8Dtei_cover_art.png" },
+          { name: "Mafia: The Old Country", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/a/af/Mafia_The_Old_Country_cover_art.jpg/250px-Mafia_The_Old_Country_cover_art.jpg" },
+          { name: "Resident Evil 7: Biohazard", cover: "https://upload.wikimedia.org/wikipedia/en/f/fd/Resident_Evil_7_cover_art.jpg" },
+          { name: "Resident Evil Village", cover: "https://upload.wikimedia.org/wikipedia/en/2/2c/Resident_Evil_Village.png" },
+          { name: "Resident Evil Requiem", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/1/15/Resident_Evil_Requiem_Cover_Art.jpg/250px-Resident_Evil_Requiem_Cover_Art.jpg" },
+          { name: "Clair Obscur: Expedition 33", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/5/5a/Clair_Obscur%2C_Expedition_33_Cover_1.webp/250px-Clair_Obscur%2C_Expedition_33_Cover_1.webp.png" },
+          { name: "Horizon Forbidden West", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/6/69/Horizon_Forbidden_West_cover_art.jpg/250px-Horizon_Forbidden_West_cover_art.jpg" },
+          { name: "Black Myth: Wukong", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/a/a6/Black_Myth_Wukong_cover_art.jpg/250px-Black_Myth_Wukong_cover_art.jpg" },
+          { name: "Red Dead Redemption", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/a/a7/Red_Dead_Redemption.jpg/250px-Red_Dead_Redemption.jpg" },
+          //{ name: "", cover: "" },
+        ]
+      },
+      wishlistunreleased: {
+        label: "Want to Play Unreleased",
+        icon: "⭐",
+        theme: "wishlistunreleased",
+        games: [
+          { name: "Marvel's Wolverine", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/3/3d/Marvel%27s_Wolverine_cover_art.jpg/250px-Marvel%27s_Wolverine_cover_art.jpg" },
+          { name: "Grand Theft Auto VI", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/4/46/Grand_Theft_Auto_VI.png/250px-Grand_Theft_Auto_VI.png" },
+          { name: "Tomb Raider: Legacy of Atlantis", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/5/5b/Tomb_Raider_Legacy_of_Atlantis_cover.jpg/250px-Tomb_Raider_Legacy_of_Atlantis_cover.jpg" },
+          { name: "Resident Evil Veronica", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/9/92/Resident_Evil_Veronica_cover_art.jpg/250px-Resident_Evil_Veronica_cover_art.jpg" },
+          { name: "Assassin's Creed Black Flag Resynced", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/6/65/Assassin%27s_Creed_Black_Flag_Resynced_cover.jpg/250px-Assassin%27s_Creed_Black_Flag_Resynced_cover.jpg" },
+          { name: "God of War: Laufey", cover: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOmWLZKSvnmpjsZ8O2_iWTOVrjyt-ybFmDSNS9aMTrXSh1xyXrvKVTvq-fPSm5S9Da3rwQKpJXCmo9acicjH5Sd8U8P9fIxReh1QqK3LWh&s=10" },
+          { name: "Intergalactic: The Heretic Prophet", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/5/53/Intergalactic_The_Heretic_Prophet_poster.png/250px-Intergalactic_The_Heretic_Prophet_poster.png" },
+          //{ name: "", cover: "" },
+        ]
+      },
+      bought: {
+        label: "Bought",
+        icon: "🛒",
+        theme: "bought",
+        games: [
+          { name: "Rise of the Tomb Raider", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/2/29/Rise_of_the_Tomb_Raider.jpg/250px-Rise_of_the_Tomb_Raider.jpg" },
+          { name: "Shadow of the Tomb Raider", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/1/11/Shadow_of_the_Tomb_Raider_cover.png/250px-Shadow_of_the_Tomb_Raider_cover.png" },
+          { name: "Horizon Zero Dawn", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/3/3e/Horizon_Zero_Dawn_cover_art.jpg/250px-Horizon_Zero_Dawn_cover_art.jpg" },
+          { name: "Mafia: Definitive Edition", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/a/ae/Mafia_Definitive_Edition.jpg/250px-Mafia_Definitive_Edition.jpg" },
+          { name: "Mafia II: Definitive Edition", cover: "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcSEP5E1bV1dAvaD6_N_6utZPXiMUAoy4tpbJ3P_VLzuHGyzjzhl4AGDgjW14cCVo8N7pSy6f9_xjUVKlyahoDg_4ZIotmegDIpZ4s5PZBA" },
+          { name: "Mafia III: Definitive Edition", cover: "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcQrPSD5r6TjLmLLaENcNXI62zfv_8o9eypsN6UU3W4f_JqfF3fRYpEXCCLu7gF2_Y6gWbyFAwYhocj6dGS3U0ZMEnnlhMQUrnk4QQWNMSxs" },
+          { name: "The Witcher 3: Wild Hunt", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/0/0c/Witcher_3_cover_art.jpg/250px-Witcher_3_cover_art.jpg" },
+          { name: "Hitman", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/8/84/Hitman_2015.jpg/250px-Hitman_2015.jpg" },
+          { name: "Hitman 2", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/8/88/Hitman_2_%282018%29_cover.jpg/250px-Hitman_2_%282018%29_cover.jpg" },
+          { name: "Hitman 3", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/4/4b/Hitman_3_Packart.jpg/250px-Hitman_3_Packart.jpg" },
+        ]
+      },
+      multiplayer: {
+        label: "Multi Player",
+        icon: "⚔️",
+        theme: "multiplayer",
+        games: [
+          { name: "WWE 2K25", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/5/53/WWE_2k25_cover.jpg/250px-WWE_2k25_cover.jpg" },
+          { name: "NBA 2K26", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/1/1d/NBA_2K26_Leave_No_Doubt_edition_cover.jpg/250px-NBA_2K26_Leave_No_Doubt_edition_cover.jpg" },
+          { name: "Tekken 8", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/b/b4/Tekken_8_cover_art.jpg/250px-Tekken_8_cover_art.jpg" },
+          { name: "Gran Turismo 7", cover: "https://upload.wikimedia.org/wikipedia/en/thumb/1/14/Gran_Turismo_7_cover_art.jpg/250px-Gran_Turismo_7_cover_art.jpg" },
+          { name: "FC 26", cover: "https://store-images.s-microsoft.com/image/apps.39200.14145291960194275.263e78bd-2ea0-43c6-8a5b-5578131f4b02.ba171ef6-2bab-4956-b9d7-e67e253520d1" },
+        ]
+      }
+    };
+
+    const THEMES = {
+      played: { color: "#22c55e", badgeText: "✓ Played", bgAlpha: "rgba(34,197,94,0.18)", border: "rgba(34,197,94,0.35)" },
+      wishlist: { color: "#eab308", badgeText: "★ Wishlist", bgAlpha: "rgba(234,179,8,0.18)", border: "rgba(234,179,8,0.35)" },
+      bought: { color: "#3b82f6", badgeText: "🛒 Bought", bgAlpha: "rgba(59,130,246,0.18)", border: "rgba(59,130,246,0.35)" },
+      wishlistunreleased: { color: "#45a386", badgeText: "★ Wishlist", bgAlpha: "rgba(234,179,8,0.18)", border: "rgba(234,179,8,0.35)"}
+    };
+    const FALLBACK_THEME = { color: "#7c3aed", badgeText: "🎮 Other", bgAlpha: "rgba(124,58,237,0.18)", border: "rgba(124,58,237,0.35)" };
+
+    function getTheme(section) {
+      return THEMES[section.theme] || { ...FALLBACK_THEME, badgeText: section.label };
+    }
+
+    function buildCard(game, t) {
+      const card = document.createElement('div');
+      card.className = 'card';
+
+      const img = document.createElement('img');
+      img.className = 'card-cover';
+      img.src = game.cover;
+      img.alt = game.name;
+      img.loading = 'lazy';
+
+      const footer = document.createElement('div');
+      footer.className = 'card-footer';
+
+      const title = document.createElement('div');
+      title.className = 'card-title';
+      title.title = game.name;
+      title.textContent = game.name;
+
+
+      footer.appendChild(title);
+      card.appendChild(img);
+      card.appendChild(footer);
+      return card;
+    }
+
+    function buildSection(key, section) {
+      const t = getTheme(section);
+
+      const wrapper = document.createElement('section');
+
+      const heading = document.createElement('div');
+      heading.className = 'section-heading';
+      heading.style.borderLeft = '4px solid ' + t.color;
+
+      const iconSpan = document.createElement('span');
+      iconSpan.textContent = section.icon;
+
+      const labelSpan = document.createElement('span');
+      labelSpan.textContent = section.label;
+
+      const count = document.createElement('span');
+      count.className = 'section-count';
+      count.textContent = section.games.length + ' game' + (section.games.length !== 1 ? 's' : '');
+
+      heading.appendChild(iconSpan);
+      heading.appendChild(labelSpan);
+      heading.appendChild(count);
+
+      const row = document.createElement('div');
+      row.className = 'card-row';
+
+      section.games.forEach(game => {
+        row.appendChild(buildCard(game, t));
+      });
+
+      wrapper.appendChild(heading);
+      wrapper.appendChild(row);
+      return wrapper;
+    }
+
+    (function render() {
+      const app = document.getElementById('app');
+      Object.entries(GAMES).forEach(([key, section]) => {
+        app.appendChild(buildSection(key, section));
+      });
+    })();
+  </script>
+</body>
+
+</html>
