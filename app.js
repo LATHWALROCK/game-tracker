@@ -1,6 +1,6 @@
 // ─── CONFIG ────────────────────────────────────────────────
 const GIST_ID   = 'acb1c87d6047beb093dd9507d46db168';
-const GH_TOKEN  = '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';
+const GH_TOKEN  = '__GH_TOKEN__';
 const GIST_FILE = 'games.json';
 // ───────────────────────────────────────────────────────────
 
