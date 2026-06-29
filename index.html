@@ -8,51 +8,46 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
 
   <nav>
     <span class="nav-brand">🎮 Game Tracker</span>
-    <button class="btn-primary" id="addGameBtn">+ Add Game</button>
+    <div class="nav-actions">
+      <button class="btn btn-primary" onclick="openAddModal()">+ Add Game</button>
+    </div>
   </nav>
 
-  <main id="app">
-    <div class="loader" id="loader">Loading your gaming universe...</div>
-  </main>
+  <main id="app"></main>
 
-  <div class="modal" id="gameModal">
-    <div class="modal-content">
-      <h2 id="modalTitle">Add Game</h2>
-      <form id="gameForm">
-        <input type="hidden" id="oldName" /> 
-        
-        <div class="form-group">
-          <label>Game Name</label>
-          <input type="text" id="gameName" required />
-        </div>
-        <div class="form-group">
-          <label>Cover Image URL</label>
-          <input type="url" id="gameCover" />
-        </div>
-        <div class="form-group">
-          <label>Status</label>
-          <select id="gameStatus">
-            <option value="played">Played</option>
-            <option value="wishlist">Want to Play Released</option>
-            <option value="wishlistunreleased">Want to Play Unreleased</option>
-            <option value="bought">Bought</option>
-            <option value="multiplayer">Multi Player</option>
-          </select>
-        </div>
-        <div class="modal-actions">
-          <button type="button" class="btn-secondary" id="cancelBtn">Cancel</button>
-          <button type="submit" class="btn-primary" id="saveBtn">Save</button>
-        </div>
-      </form>
+  <!-- Add Game Modal -->
+  <div class="modal-backdrop" id="addModal">
+    <div class="modal">
+      <h2>➕ Add a Game</h2>
+      <div>
+        <label>Section</label>
+        <select id="input-section"></select>
+      </div>
+      <div>
+        <label>Game Name</label>
+        <input type="text" id="input-name" placeholder="e.g. Elden Ring" />
+      </div>
+      <div>
+        <label>Cover Image URL</label>
+        <input type="url" id="input-cover" placeholder="https://..." />
+      </div>
+      <span class="modal-error" id="modal-error">Please fill in all fields.</span>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeAddModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="handleAddGame()">Add Game</button>
+      </div>
     </div>
   </div>
 
-  <script src="index.js"></script>
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script src="app.js"></script>
 </body>
 </html>
