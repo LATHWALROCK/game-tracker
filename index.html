@@ -21,10 +21,10 @@
 
   <main id="app"></main>
 
-  <!-- Add Game Modal -->
+  <!-- ── Add / Edit Modal ── -->
   <div class="modal-backdrop" id="addModal">
     <div class="modal">
-      <h2>➕ Add a Game</h2>
+      <h2 id="modal-title">➕ Add a Game</h2>
       <div>
         <label>Section</label>
         <select id="input-section"></select>
@@ -37,15 +37,43 @@
         <label>Cover Image URL</label>
         <input type="url" id="input-cover" placeholder="https://..." />
       </div>
+      <div id="hours-field" style="display:none;">
+        <label>Hours Played</label>
+        <input type="number" id="input-hours" placeholder="e.g. 42" min="0" />
+      </div>
       <span class="modal-error" id="modal-error">Please fill in all fields.</span>
       <div class="modal-actions">
         <button class="btn btn-ghost" onclick="closeAddModal()">Cancel</button>
-        <button class="btn btn-primary" onclick="handleAddGame()">Add Game</button>
+        <button class="btn btn-primary" id="modal-submit-btn" onclick="handleSubmitModal()">Add Game</button>
       </div>
     </div>
   </div>
 
-  <!-- Toast -->
+  <!-- ── Detail Popup ── -->
+  <div class="modal-backdrop" id="detailModal">
+    <div class="modal detail-modal">
+      <button class="detail-close" onclick="closeDetailModal()">✕</button>
+      <div class="detail-cover-wrap">
+        <img id="detail-cover" src="" alt="" />
+      </div>
+      <div class="detail-body">
+        <div class="detail-header">
+          <h2 id="detail-title"></h2>
+          <span class="badge" id="detail-badge"></span>
+        </div>
+        <div class="detail-meta" id="detail-hours-row" style="display:none;">
+          <span class="detail-meta-label">⏱ Hours Played</span>
+          <span class="detail-meta-value" id="detail-hours"></span>
+        </div>
+        <div class="detail-actions">
+          <button class="btn btn-primary" id="detail-edit-btn">✏️ Edit</button>
+          <button class="btn btn-danger" id="detail-delete-btn">🗑 Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Toast ── -->
   <div class="toast" id="toast"></div>
 
   <script src="app.js"></script>
