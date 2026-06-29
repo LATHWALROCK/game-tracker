@@ -1,6 +1,6 @@
 // ─── CONFIG ────────────────────────────────────────────────
 const GIST_ID   = 'acb1c87d6047beb093dd9507d46db168';
-const GH_TOKEN  = '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';
+const GH_TOKEN  = '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';
 const GIST_FILE = 'games.json';
 // ───────────────────────────────────────────────────────────
 
@@ -9,7 +9,6 @@ const API_URL = `https://api.github.com/gists/${GIST_ID}`;
 const THEMES = {
   played:             { color: '#22c55e', border: 'rgba(34,197,94,0.35)',  label: '✓ Played'    },
   wishlist:           { color: '#eab308', border: 'rgba(234,179,8,0.35)',  label: '★ Wishlist'  },
-  wishlistunreleased: { color: '#eab308', border: 'rgba(234,179,8,0.35)',  label: '★ Wishlist'  },
   bought:             { color: '#3b82f6', border: 'rgba(59,130,246,0.35)', label: '🛒 Bought'   },
   multiplayer:        { color: '#f97316', border: 'rgba(249,115,22,0.35)', label: '⚔️ Multi'    },
 };
