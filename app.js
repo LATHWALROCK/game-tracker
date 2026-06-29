@@ -2,7 +2,7 @@
 // 🔧 CONFIG — replace with your values
 // ─────────────────────────────────────────────────────────────
 const GIST_ID   = 'acb1c87d6047beb093dd9507d46db168';
-const GH_TOKEN  = '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';
+const GH_TOKEN  = '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';
 const GIST_FILE = 'games.json';
 // ─────────────────────────────────────────────────────────────
 
