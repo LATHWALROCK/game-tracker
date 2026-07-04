@@ -14,9 +14,6 @@ export default function DetailModal({ isOpen, game, sectionKey, onClose, onEdit,
     >
       <div className="modal modal--detail">
 
-        {/* Close */}
-        <button className="modal-close" onClick={onClose}>✕</button>
-
         <div className="detail-layout">
 
           {/* Cover */}
@@ -41,7 +38,8 @@ export default function DetailModal({ isOpen, game, sectionKey, onClose, onEdit,
             {/* Title */}
             <h2 className="detail-title">{game.name}</h2>
 
-            {/* Section badge */}
+             <div class = "played">
+                {/* Section badge */}
             <span
               className="detail-badge"
               style={{
@@ -60,6 +58,7 @@ export default function DetailModal({ isOpen, game, sectionKey, onClose, onEdit,
                 <span>{game.hoursPlayed} hours played</span>
               </div>
             )}
+             </div>
 
             {/* Divider */}
             <div className="detail-divider" />
