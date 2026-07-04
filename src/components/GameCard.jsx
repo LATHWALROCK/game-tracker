@@ -26,10 +26,6 @@ export default function GameCard({ game, sectionKey, onDetail }) {
             <div className="card-cover-placeholder">🎮</div>
           )
         }
-        {/* Section badge overlaid on cover */}
-        <span className="card-badge" style={{ background: theme.color }}>
-          {theme.label || sectionKey}
-        </span>
       </div>
 
       {/* Body */}
