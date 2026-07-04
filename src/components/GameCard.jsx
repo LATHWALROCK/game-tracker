@@ -1,26 +1,46 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { THEMES, FALLBACK_THEME, HOURS_SECTIONS } from '../constants'
-export default function GameCard({ game, sectionKey, onEdit, onDelete, onDetail }) {
-  const [hover, setHover] = useState(false)
+
+export default function GameCard({ game, sectionKey, onDetail }) {
   const theme = THEMES[sectionKey] || FALLBACK_THEME
   const showHours = HOURS_SECTIONS.includes(sectionKey)
+
   return (
-    <div className="game-card" style={{ borderColor: theme.border }}
-      onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)} onClick={onDetail}>
-      {hover && (
-        <div className="card-actions">
-          <button className="card-action-btn" onClick={e => { e.stopPropagation(); onEdit() }}>✏️</button>
-          <button className="card-action-btn card-action-btn--delete" onClick={e => { e.stopPropagation(); onDelete() }}>🗑</button>
-        </div>
-      )}
+    <div
+      className="game-card"
+      style={{ '--theme-color': theme.color, '--theme-border': theme.border }}
+      onClick={onDetail}
+    >
+      {/* Cover */}
       <div className="card-cover-wrap">
         {game.cover
-          ? <img src={game.cover} alt={game.name} className="card-cover" loading="lazy" onError={e => { e.target.style.display='none' }} />
-          : <div className="card-cover-placeholder">🎮</div>}
+          ? (
+            <img
+              src={game.cover}
+              alt={game.name}
+              className="card-cover"
+              loading="lazy"
+              onError={e => { e.target.style.display = 'none' }}
+            />
+          ) : (
+            <div className="card-cover-placeholder">🎮</div>
+          )
+        }
+        {/* Section badge overlaid on cover */}
+        <span className="card-badge" style={{ background: theme.color }}>
+          {theme.label || sectionKey}
+        </span>
       </div>
+
+      {/* Body */}
       <div className="card-body">
         <p className="card-title">{game.name}</p>
-        {showHours && game.hoursPlayed != null && <p className="card-hours">{game.hoursPlayed}h played</p>}
+        {showHours && game.hoursPlayed != null && (
+          <p className="card-hours">
+            <span className="card-hours-icon">⏱</span>
+            {game.hoursPlayed}h played
+          </p>
+        )}
       </div>
     </div>
   )
