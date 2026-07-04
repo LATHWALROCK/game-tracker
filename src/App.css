@@ -288,6 +288,13 @@ html, body, #root {
   font-weight: 700;
   line-height: 1.3;
 }
+.played {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
 .detail-badge {
   display: inline-flex;
   align-items: center;
