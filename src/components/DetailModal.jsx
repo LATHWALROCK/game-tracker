@@ -14,9 +14,12 @@ export default function DetailModal({ isOpen, game, sectionKey, onClose, onEdit,
     >
       <div className="modal modal--detail">
 
+        {/* Close button */}
+        <button className="modal-close" onClick={onClose}>✕</button>
+
         <div className="detail-layout">
 
-          {/* Cover */}
+          {/* Cover — square */}
           <div className="detail-cover-wrap">
             {game.cover
               ? (
@@ -38,37 +41,42 @@ export default function DetailModal({ isOpen, game, sectionKey, onClose, onEdit,
             {/* Title */}
             <h2 className="detail-title">{game.name}</h2>
 
-             <div class = "played">
-                {/* Section badge */}
-            <span
-              className="detail-badge"
-              style={{
-                backgroundColor: theme.border,
-                color: theme.color,
-                borderColor: theme.color
-              }}
-            >
-              {theme.label}
-            </span>
+            {/* Badge + Hours row */}
+            <div className="detail-meta">
+              <span
+                className="detail-badge"
+                style={{
+                  backgroundColor: theme.border,
+                  color: theme.color,
+                  borderColor: theme.color
+                }}
+              >
+                {theme.label}
+              </span>
 
-            {/* Hours */}
-            {showHours && (
-              <div className="detail-hours">
-                <span className="detail-hours-icon">⏱</span>
-                <span>{game.hoursPlayed} hours played</span>
-              </div>
-            )}
-             </div>
+              {showHours && (
+                <div className="detail-hours">
+                  <span className="detail-hours-icon">⏱</span>
+                  <span>{game.hoursPlayed}h played</span>
+                </div>
+              )}
+            </div>
 
             {/* Divider */}
             <div className="detail-divider" />
 
             {/* Actions */}
             <div className="detail-actions">
-              <button className="btn btn-primary detail-action-btn" onClick={onEdit}>
+              <button
+                className="btn btn-primary detail-action-btn"
+                onClick={onEdit}
+              >
                 <span>✏️</span> Edit Game
               </button>
-              <button className="btn btn-danger detail-action-btn" onClick={onDelete}>
+              <button
+                className="btn btn-danger detail-action-btn"
+                onClick={onDelete}
+              >
                 <span>🗑</span> Delete
               </button>
             </div>
