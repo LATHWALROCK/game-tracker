@@ -14,9 +14,6 @@ export default function DetailModal({ isOpen, game, sectionKey, onClose, onEdit,
     >
       <div className="modal modal--detail">
 
-        {/* Close button */}
-        <button className="modal-close" onClick={onClose}>✕</button>
-
         <div className="detail-layout">
 
           {/* Cover — square */}
