@@ -267,16 +267,17 @@ html, body, #root {
 .form-error { color: #f87171; font-size: 0.78rem; }
 
 /* ── DETAIL MODAL ───────────────────────────────────── */
+/* ── DETAIL MODAL ───────────────────────────────────── */
 .detail-layout {
   display: flex;
-  flex-direction: column;
+  flex-direction: column;   /* ✅ Always column — same on all screen sizes */
   gap: 1.25rem;
-  align-items: flex-start;
+  align-items: center;      /* ✅ Center everything */
 }
 
 /* ✅ Square cover in detail modal */
 .detail-cover-wrap {
-  width: 130px;
+  width: 160px;             /* ✅ Slightly bigger on desktop too */
   flex-shrink: 0;
   border-radius: var(--radius);
   overflow: hidden;
@@ -299,10 +300,11 @@ html, body, #root {
 }
 .detail-info {
   flex: 1;
+  width: 100%;              /* ✅ Full width since column layout */
   display: flex;
   flex-direction: column;
   gap: 0.7rem;
-  padding-top: 0.2rem;
+  padding-top: 0;           /* ✅ No top padding needed in column */
   min-width: 0;
 }
 .detail-title {
@@ -310,6 +312,7 @@ html, body, #root {
   font-weight: 700;
   line-height: 1.3;
   word-break: break-word;
+  text-align: center;       /* ✅ Centered title */
 }
 
 /* Badge + hours on same row */
@@ -317,6 +320,7 @@ html, body, #root {
   display: flex;
   flex-direction: row;
   align-items: center;
+  justify-content: center;  /* ✅ Always centered */
   gap: 0.6rem;
   flex-wrap: wrap;
 }
