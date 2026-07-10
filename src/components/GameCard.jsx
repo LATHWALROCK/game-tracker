@@ -11,7 +11,7 @@ export default function GameCard({ game, sectionKey, onDetail }) {
       style={{ '--theme-color': theme.color, '--theme-border': theme.border }}
       onClick={onDetail}
     >
-      {/* Cover */}
+      {/* Cover — square */}
       <div className="card-cover-wrap">
         {game.cover
           ? (
@@ -26,6 +26,10 @@ export default function GameCard({ game, sectionKey, onDetail }) {
             <div className="card-cover-placeholder">🎮</div>
           )
         }
+        {/* Badge */}
+        <span className="card-badge" style={{ background: theme.color }}>
+          {theme.label}
+        </span>
       </div>
 
       {/* Body */}
@@ -34,7 +38,7 @@ export default function GameCard({ game, sectionKey, onDetail }) {
         {showHours && game.hoursPlayed != null && (
           <p className="card-hours">
             <span className="card-hours-icon">⏱</span>
-            {game.hoursPlayed}h played
+            {game.hoursPlayed}h
           </p>
         )}
       </div>
