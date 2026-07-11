@@ -29,7 +29,7 @@ export default function GameCard({ game, sectionKey, onDetail }) {
       </div>
 
       {/* Body */}
-      <div className="card-body">
+      {/* <div className="card-body">
         <p className="card-title">{game.name}</p>
         {showHours && game.hoursPlayed != null && (
           <p className="card-hours">
@@ -37,7 +37,7 @@ export default function GameCard({ game, sectionKey, onDetail }) {
             {game.hoursPlayed}h
           </p>
         )}
-      </div>
+      </div> */}
     </div>
   )
 }
