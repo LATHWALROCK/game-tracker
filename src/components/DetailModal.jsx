@@ -1,7 +1,11 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { THEMES, FALLBACK_THEME, HOURS_SECTIONS } from '../constants'
 
 export default function DetailModal({ isOpen, game, sectionKey, onClose, onEdit, onDelete }) {
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
+
+  useEffect(() => { setConfirmingDelete(false) }, [isOpen, game])
+
   if (!isOpen || !game) return null
 
   const theme = THEMES[sectionKey] || FALLBACK_THEME
@@ -70,12 +74,29 @@ export default function DetailModal({ isOpen, game, sectionKey, onClose, onEdit,
               >
                 <span>✏️</span> Edit Game
               </button>
-              <button
-                className="btn btn-danger detail-action-btn"
-                onClick={onDelete}
-              >
-                <span>🗑</span> Delete
-              </button>
+              {confirmingDelete ? (
+                <div className="detail-actions-row">
+                  <button
+                    className="btn btn-ghost detail-action-btn"
+                    onClick={() => setConfirmingDelete(false)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="btn btn-danger btn-danger--armed detail-action-btn"
+                    onClick={onDelete}
+                  >
+                    <span>⚠️</span> Confirm Delete?
+                  </button>
+                </div>
+              ) : (
+                <button
+                  className="btn btn-danger detail-action-btn"
+                  onClick={() => setConfirmingDelete(true)}
+                >
+                  <span>🗑</span> Delete
+                </button>
+              )}
             </div>
 
           </div>

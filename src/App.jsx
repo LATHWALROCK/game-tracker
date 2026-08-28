@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react'
 import { useGames } from './hooks/useGames'
 import { useToast } from './hooks/useToast'
 import Navbar from './components/Navbar'
+import StatsPanel from './components/StatsPanel'
 import GameSection from './components/GameSection'
 import GameModal from './components/GameModal'
 import DetailModal from './components/DetailModal'
@@ -21,7 +22,7 @@ export default function App() {
   // ADD GAME
   const handleAddSubmit = useCallback(async ({ section, name, cover, hoursPlayed }) => {
     const newData = structuredClone(data)
-    const game = { name, cover }
+    const game = { name, cover, addedAt: Date.now() }
     if (hoursPlayed !== undefined) game.hoursPlayed = hoursPlayed
     newData[section].games.push(game)
     try {
@@ -40,7 +41,7 @@ export default function App() {
     // Remove from old section
     newData[editData.sectionKey].games.splice(editData.idx, 1)
     // Add to (possibly new) section
-    const game = { name, cover }
+    const game = { name, cover, addedAt: editData.game.addedAt }
     if (hoursPlayed !== undefined) game.hoursPlayed = hoursPlayed
     newData[section].games.push(game)
     try {
@@ -66,6 +67,17 @@ export default function App() {
     }
   }, [data, saveGames, showToast])
 
+  // REORDER GAMES WITHIN A SECTION (drag-and-drop)
+  const handleReorder = useCallback(async (sectionKey, newGames) => {
+    const newData = structuredClone(data)
+    newData[sectionKey].games = newGames
+    try {
+      await saveGames(newData)
+    } catch (e) {
+      showToast(e.message, 'error')
+    }
+  }, [data, saveGames, showToast])
+
   return (
     <>
       <Navbar onAddGame={() => setGameModal({ open: true, mode: 'add', editData: null })} />
@@ -73,6 +85,7 @@ export default function App() {
       <main className="main-content">
         {loading && <div className="loader">⏳ Loading games…</div>}
         {error   && <div className="loader error-text">❌ {error}</div>}
+        {!loading && !error && data && <StatsPanel data={data} />}
         {!loading && !error && data && Object.entries(data).map(([key, section]) => (
           <GameSection
             key={key}
@@ -83,6 +96,7 @@ export default function App() {
             onDelete={(sectionKey, idx) => handleDelete(sectionKey, idx)}
             onDetail={(game, sectionKey, idx) =>
               setDetailModal({ open: true, game, sectionKey, idx })}
+            onReorder={handleReorder}
           />
         ))}
       </main>
