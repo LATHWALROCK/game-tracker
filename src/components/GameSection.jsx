@@ -17,7 +17,17 @@ export default function GameSection({ sectionKey, section, onEdit, onDelete, onD
 
   const resetDrag = () => { setDragIdx(null); setOverIdx(null) }
 
-  const handleDrop = () => {
+  const handleDragStart = (idx, e) => {
+    // Firefox requires dataTransfer.setData to be called for the drag to proceed at all.
+    e.dataTransfer.setData('text/plain', String(idx))
+    e.dataTransfer.effectAllowed = 'move'
+    setDragIdx(idx)
+  }
+
+  const handleDrop = (e) => {
+    // Without preventDefault, the browser's default drop action (e.g. opening the
+    // dragged card as a navigation) runs instead of our reorder logic.
+    e.preventDefault()
     if (dragIdx == null || overIdx == null || dragIdx === overIdx) { resetDrag(); return }
     onReorder(sectionKey, arrayMove(games, dragIdx, overIdx))
     resetDrag()
@@ -56,7 +66,7 @@ export default function GameSection({ sectionKey, section, onEdit, onDelete, onD
               draggable={dragEnabled}
               isDragging={dragIdx === idx}
               isDropTarget={overIdx === idx && dragIdx !== idx}
-              onDragStart={() => setDragIdx(idx)}
+              onDragStart={e => handleDragStart(idx, e)}
               onDragOver={e => { e.preventDefault(); setOverIdx(idx) }}
               onDrop={handleDrop}
               onDragEnd={resetDrag}

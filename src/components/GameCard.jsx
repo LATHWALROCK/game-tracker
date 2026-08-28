@@ -1,5 +1,5 @@
 import React from 'react'
-import { THEMES, FALLBACK_THEME, HOURS_SECTIONS } from '../constants'
+import { THEMES, FALLBACK_THEME } from '../constants'
 
 export default function GameCard({
   game, sectionKey, onDetail,
@@ -7,7 +7,6 @@ export default function GameCard({
   onDragStart, onDragOver, onDrop, onDragEnd,
 }) {
   const theme = THEMES[sectionKey] || FALLBACK_THEME
-  const showHours = HOURS_SECTIONS.includes(sectionKey)
 
   const className = [
     'game-card',
@@ -35,23 +34,13 @@ export default function GameCard({
               alt={game.name}
               className="card-cover"
               loading="lazy"
+              draggable={false}
               onError={e => { e.target.style.display = 'none' }}
             />
           ) : (
             <div className="card-cover-placeholder">🎮</div>
           )
         }
-      </div>
-
-      {/* Body */}
-      <div className="card-body">
-        <p className="card-title">{game.name}</p>
-        {showHours && game.hoursPlayed != null && (
-          <p className="card-hours">
-            <span className="card-hours-icon">⏱</span>
-            {game.hoursPlayed}h
-          </p>
-        )}
       </div>
     </div>
   )
