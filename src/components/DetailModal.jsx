@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { THEMES, FALLBACK_THEME, HOURS_SECTIONS } from '../constants'
 
-export default function DetailModal({ isOpen, game, sectionKey, onClose, onEdit, onDelete }) {
+export default function DetailModal({ isOpen, game, sectionKey, onClose, onEdit, onDelete, onTogglePlaying }) {
   const [confirmingDelete, setConfirmingDelete] = useState(false)
 
   useEffect(() => { setConfirmingDelete(false) }, [isOpen, game])
@@ -10,6 +10,7 @@ export default function DetailModal({ isOpen, game, sectionKey, onClose, onEdit,
 
   const theme = THEMES[sectionKey] || FALLBACK_THEME
   const showHours = HOURS_SECTIONS.includes(sectionKey) && game.hoursPlayed != null
+  const isPlaying = !!game.currentlyPlaying
 
   return (
     <div
@@ -68,6 +69,12 @@ export default function DetailModal({ isOpen, game, sectionKey, onClose, onEdit,
 
             {/* Actions */}
             <div className="detail-actions">
+              <button
+                className={`btn detail-action-btn ${isPlaying ? 'btn-playing btn-playing--active' : 'btn-playing'}`}
+                onClick={onTogglePlaying}
+              >
+                {isPlaying ? <><span>⏸</span> Stop Playing</> : <><span>▶</span> Mark as Currently Playing</>}
+              </button>
               <button
                 className="btn btn-primary detail-action-btn"
                 onClick={onEdit}

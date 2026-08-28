@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react'
 import { useGames } from './hooks/useGames'
 import { useToast } from './hooks/useToast'
 import Navbar from './components/Navbar'
+import NowPlaying from './components/NowPlaying'
 import StatsPanel from './components/StatsPanel'
 import GameSection from './components/GameSection'
 import GameModal from './components/GameModal'
@@ -42,6 +43,7 @@ export default function App() {
     newData[editData.sectionKey].games.splice(editData.idx, 1)
     // Add to (possibly new) section
     const game = { name, cover, addedAt: editData.game.addedAt }
+    if (editData.game.currentlyPlaying) game.currentlyPlaying = true
     if (hoursPlayed !== undefined) game.hoursPlayed = hoursPlayed
     newData[section].games.push(game)
     try {
@@ -78,6 +80,20 @@ export default function App() {
     }
   }, [data, saveGames, showToast])
 
+  // TOGGLE "CURRENTLY PLAYING"
+  const handleTogglePlaying = useCallback(async (sectionKey, idx) => {
+    const newData = structuredClone(data)
+    const game = newData[sectionKey].games[idx]
+    game.currentlyPlaying = !game.currentlyPlaying
+    try {
+      await saveGames(newData)
+      setDetailModal(prev => (prev.open ? { ...prev, game } : prev))
+      showToast(game.currentlyPlaying ? 'Marked as currently playing.' : 'Removed from Now Playing.', 'success')
+    } catch (e) {
+      showToast(e.message, 'error')
+    }
+  }, [data, saveGames, showToast])
+
   return (
     <>
       <Navbar onAddGame={() => setGameModal({ open: true, mode: 'add', editData: null })} />
@@ -85,6 +101,12 @@ export default function App() {
       <main className="main-content">
         {loading && <div className="loader">⏳ Loading games…</div>}
         {error   && <div className="loader error-text">❌ {error}</div>}
+        {!loading && !error && data && (
+          <NowPlaying
+            data={data}
+            onDetail={(game, sectionKey, idx) => setDetailModal({ open: true, game, sectionKey, idx })}
+          />
+        )}
         {!loading && !error && data && <StatsPanel data={data} />}
         {!loading && !error && data && Object.entries(data).map(([key, section]) => (
           <GameSection
@@ -124,6 +146,7 @@ export default function App() {
           }})
         }}
         onDelete={() => handleDelete(detailModal.sectionKey, detailModal.idx)}
+        onTogglePlaying={() => handleTogglePlaying(detailModal.sectionKey, detailModal.idx)}
       />
 
       <Toast message={toast.msg} type={toast.type} visible={toast.visible} />
