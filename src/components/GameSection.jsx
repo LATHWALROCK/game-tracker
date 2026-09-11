@@ -35,23 +35,36 @@ export default function GameSection({ sectionKey, section, onEdit, onDelete, onD
 
   return (
     <section className="game-section">
-      <h2 className="section-heading" style={{ borderLeftColor: theme.color }}>
-        <span className="section-icon">{section.icon}</span>
-        {section.label}
-        <span className="section-count">{games.length}</span>
-        {showSort && games.length > 0 && (
-          <select
-            className="section-sort"
-            value={sortMode}
-            onChange={e => setSortMode(e.target.value)}
-            aria-label={`Sort ${section.label}`}
-          >
-            {SORT_MODES.map(m => (
-              <option key={m.value} value={m.value}>{m.label}</option>
-            ))}
-          </select>
-        )}
-      </h2>
+      <header
+        className="section-header"
+        style={{ '--theme-color': theme.color, '--theme-border': theme.border }}
+      >
+        <div className="section-header-row">
+          <span className="section-icon-tile" aria-hidden="true">{section.icon}</span>
+
+          <div className="section-titles">
+            <h2 className="section-title">{section.label}</h2>
+            <span className="section-count">
+              {games.length} {games.length === 1 ? 'game' : 'games'}
+            </span>
+          </div>
+
+          {showSort && games.length > 0 && (
+            <select
+              className="section-sort"
+              value={sortMode}
+              onChange={e => setSortMode(e.target.value)}
+              aria-label={`Sort ${section.label}`}
+            >
+              {SORT_MODES.map(m => (
+                <option key={m.value} value={m.value}>{m.label}</option>
+              ))}
+            </select>
+          )}
+        </div>
+
+        <div className="section-rule" />
+      </header>
 
       {games.length === 0 ? (
         <p className="section-empty">No games yet. Add one!</p>
