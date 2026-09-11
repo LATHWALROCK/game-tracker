@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import GameCard from './GameCard'
+import Select from './Select'
 import { THEMES, FALLBACK_THEME, isSortable } from '../constants'
 import { SORT_MODES, sortGames, arrayMove } from '../utils/gameOrdering'
 
@@ -50,16 +51,14 @@ export default function GameSection({ sectionKey, section, onEdit, onDelete, onD
           </div>
 
           {showSort && games.length > 0 && (
-            <select
-              className="section-sort"
-              value={sortMode}
-              onChange={e => setSortMode(e.target.value)}
-              aria-label={`Sort ${section.label}`}
-            >
-              {SORT_MODES.map(m => (
-                <option key={m.value} value={m.value}>{m.label}</option>
-              ))}
-            </select>
+            <div className="section-sort">
+              <Select
+                value={sortMode}
+                options={SORT_MODES}
+                onChange={setSortMode}
+                label={`Sort ${section.label}`}
+              />
+            </div>
           )}
         </div>
 

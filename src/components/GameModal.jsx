@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { HOURS_SECTIONS } from '../constants'
+import Select from './Select'
 export default function GameModal({ isOpen, mode, sections, editData, onClose, onSubmit }) {
   const [section, setSection]   = useState('')
   const [name, setName]         = useState('')
@@ -21,6 +22,9 @@ export default function GameModal({ isOpen, mode, sections, editData, onClose, o
   }, [isOpen, mode, editData, sections])
   if (!isOpen) return null
   const showHours = HOURS_SECTIONS.includes(section)
+  const sectionOptions = sections
+    ? Object.entries(sections).map(([key, sec]) => ({ value: key, label: `${sec.icon} ${sec.label}` }))
+    : []
   const validate = () => {
     const e = {}
     if (!name.trim())  e.name  = 'Game name is required'
@@ -43,12 +47,14 @@ export default function GameModal({ isOpen, mode, sections, editData, onClose, o
         </div>
         <form onSubmit={handleSubmit} noValidate>
           <div className="form-group">
-            <label htmlFor="gm-section">Section</label>
-            <select id="gm-section" value={section} onChange={e => setSection(e.target.value)}>
-              {sections && Object.entries(sections).map(([key, sec]) => (
-                <option key={key} value={key}>{sec.icon} {sec.label}</option>
-              ))}
-            </select>
+            <span className="form-label">Section</span>
+            <Select
+              value={section}
+              options={sectionOptions}
+              onChange={setSection}
+              label="Section"
+              align="left"
+            />
           </div>
           <div className="form-group">
             <label htmlFor="gm-name">Game Name</label>
