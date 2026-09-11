@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react'
+import { canBeNowPlaying } from './constants'
 import { useGames } from './hooks/useGames'
 import { useToast } from './hooks/useToast'
 import Navbar from './components/Navbar'
@@ -43,7 +44,8 @@ export default function App() {
     newData[editData.sectionKey].games.splice(editData.idx, 1)
     // Add to (possibly new) section
     const game = { name, cover, addedAt: editData.game.addedAt }
-    if (editData.game.currentlyPlaying) game.currentlyPlaying = true
+    // Moving a game into a section that can't be "now playing" drops the flag.
+    if (editData.game.currentlyPlaying && canBeNowPlaying(section)) game.currentlyPlaying = true
     if (hoursPlayed !== undefined) game.hoursPlayed = hoursPlayed
     newData[section].games.push(game)
     try {
@@ -82,6 +84,7 @@ export default function App() {
 
   // TOGGLE "CURRENTLY PLAYING"
   const handleTogglePlaying = useCallback(async (sectionKey, idx) => {
+    if (!canBeNowPlaying(sectionKey)) return
     const newData = structuredClone(data)
     const game = newData[sectionKey].games[idx]
     game.currentlyPlaying = !game.currentlyPlaying

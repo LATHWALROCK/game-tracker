@@ -8,3 +8,10 @@ export const THEMES = {
 export const FALLBACK_THEME = { color: '#7c3aed', border: 'rgba(124,58,237,0.2)', label: 'Game' }
 
 export const HOURS_SECTIONS = ['played', 'multiplayer', 'abandoned']
+
+// Only games in these sections can be marked as "currently playing" — the
+// Now Playing row is meant for what you're working through off the wishlist,
+// not for games already played or ongoing multiplayer titles.
+export const NOW_PLAYING_SECTIONS = ['wishlist']
+
+export const canBeNowPlaying = (sectionKey) => NOW_PLAYING_SECTIONS.includes(sectionKey)

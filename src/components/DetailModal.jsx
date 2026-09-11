@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { THEMES, FALLBACK_THEME, HOURS_SECTIONS } from '../constants'
+import { THEMES, FALLBACK_THEME, HOURS_SECTIONS, canBeNowPlaying } from '../constants'
 
 export default function DetailModal({ isOpen, game, sectionKey, onClose, onEdit, onDelete, onTogglePlaying }) {
   const [confirmingDelete, setConfirmingDelete] = useState(false)
@@ -10,7 +10,8 @@ export default function DetailModal({ isOpen, game, sectionKey, onClose, onEdit,
 
   const theme = THEMES[sectionKey] || FALLBACK_THEME
   const showHours = HOURS_SECTIONS.includes(sectionKey) && game.hoursPlayed != null
-  const isPlaying = !!game.currentlyPlaying
+  const showPlayingToggle = canBeNowPlaying(sectionKey)
+  const isPlaying = showPlayingToggle && !!game.currentlyPlaying
 
   return (
     <div
@@ -69,12 +70,14 @@ export default function DetailModal({ isOpen, game, sectionKey, onClose, onEdit,
 
             {/* Actions */}
             <div className="detail-actions">
-              <button
-                className={`btn detail-action-btn ${isPlaying ? 'btn-playing btn-playing--active' : 'btn-playing'}`}
-                onClick={onTogglePlaying}
-              >
-                {isPlaying ? <><span>⏸</span> Stop Playing</> : <><span>▶</span> Mark as Currently Playing</>}
-              </button>
+              {showPlayingToggle && (
+                <button
+                  className={`btn detail-action-btn ${isPlaying ? 'btn-playing btn-playing--active' : 'btn-playing'}`}
+                  onClick={onTogglePlaying}
+                >
+                  {isPlaying ? <><span>⏸</span> Stop Playing</> : <><span>▶</span> Mark as Currently Playing</>}
+                </button>
+              )}
               <button
                 className="btn btn-primary detail-action-btn"
                 onClick={onEdit}
