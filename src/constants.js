@@ -1,7 +1,12 @@
+// Section colours double as the categorical palette for the library-split bar,
+// so they're stepped to pass the dark-surface checks: all four inside the
+// OKLCH lightness band 0.48–0.67 (the old green/yellow sat at 0.72/0.80 and
+// glared), chroma floor, >=3:1 against the surface, and no colour-blind
+// collision (the old blue and purple were ΔE 0.9 apart under deuteranopia).
 export const THEMES = {
-  played:             { color: '#22c55e', border: 'rgba(34,197,94,0.2)',   label: 'Played'           },
-  wishlist:           { color: '#eab308', border: 'rgba(234,179,8,0.2)',   label: 'Wishlist'         },
-  bought:             { color: '#3b82f6', border: 'rgba(59,130,246,0.2)',  label: 'Bought'           },
+  played:             { color: '#16a34a', border: 'rgba(22,163,74,0.2)',   label: 'Played'           },
+  wishlist:           { color: '#d97706', border: 'rgba(217,119,6,0.2)',   label: 'Wishlist'         },
+  bought:             { color: '#0891b2', border: 'rgba(8,145,178,0.2)',   label: 'Bought'           },
   multiplayer:        { color: '#a855f7', border: 'rgba(168,85,247,0.2)',  label: 'Multiplayer'      },
 }
 

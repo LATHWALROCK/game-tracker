@@ -14,5 +14,10 @@ export function computeStats(data) {
     sections.push({ key, label: section.label, icon: section.icon, count: games.length })
   }
 
+  // Share of the library, for the split bar
+  for (const s of sections) {
+    s.percent = totalGames > 0 ? (s.count / totalGames) * 100 : 0
+  }
+
   return { totalGames, totalHours, sections }
 }
