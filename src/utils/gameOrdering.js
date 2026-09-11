@@ -1,19 +1,13 @@
 export const SORT_MODES = [
-  { value: 'manual',    label: 'Manual' },
-  { value: 'name',      label: 'Name (A-Z)' },
-  { value: 'hours',     label: 'Hours Played' },
-  { value: 'dateAdded', label: 'Date Added' },
+  { value: 'manual', label: 'Manual' },
+  { value: 'hours',  label: 'Hours Played' },
 ]
 
 export function sortGames(games, mode) {
   if (mode === 'manual') return games
   const sorted = [...games]
-  if (mode === 'name') {
-    sorted.sort((a, b) => a.name.localeCompare(b.name))
-  } else if (mode === 'hours') {
+  if (mode === 'hours') {
     sorted.sort((a, b) => (b.hoursPlayed ?? 0) - (a.hoursPlayed ?? 0))
-  } else if (mode === 'dateAdded') {
-    sorted.sort((a, b) => (b.addedAt ?? 0) - (a.addedAt ?? 0))
   }
   return sorted
 }

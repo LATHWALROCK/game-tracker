@@ -1,12 +1,12 @@
 import React, { useMemo, useState } from 'react'
 import GameCard from './GameCard'
-import { THEMES, FALLBACK_THEME, HOURS_SECTIONS } from '../constants'
+import { THEMES, FALLBACK_THEME, isSortable } from '../constants'
 import { SORT_MODES, sortGames, arrayMove } from '../utils/gameOrdering'
 
 export default function GameSection({ sectionKey, section, onEdit, onDelete, onDetail, onReorder }) {
   const theme = THEMES[sectionKey] || FALLBACK_THEME
   const games = section.games || []
-  const showHoursOption = HOURS_SECTIONS.includes(sectionKey)
+  const showSort = isSortable(sectionKey)
 
   const [sortMode, setSortMode] = useState('manual')
   const [dragIdx, setDragIdx] = useState(null)
@@ -39,14 +39,14 @@ export default function GameSection({ sectionKey, section, onEdit, onDelete, onD
         <span className="section-icon">{section.icon}</span>
         {section.label}
         <span className="section-count">{games.length}</span>
-        {games.length > 0 && (
+        {showSort && games.length > 0 && (
           <select
             className="section-sort"
             value={sortMode}
             onChange={e => setSortMode(e.target.value)}
             aria-label={`Sort ${section.label}`}
           >
-            {SORT_MODES.filter(m => m.value !== 'hours' || showHoursOption).map(m => (
+            {SORT_MODES.map(m => (
               <option key={m.value} value={m.value}>{m.label}</option>
             ))}
           </select>
@@ -62,6 +62,7 @@ export default function GameSection({ sectionKey, section, onEdit, onDelete, onD
               key={`${sectionKey}-${game.name}-${game.addedAt ?? idx}`}
               game={game}
               sectionKey={sectionKey}
+              showHours={sortMode === 'hours'}
               onDetail={() => onDetail(game, sectionKey, games.indexOf(game))}
               draggable={dragEnabled}
               isDragging={dragIdx === idx}

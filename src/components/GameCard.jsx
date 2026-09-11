@@ -2,11 +2,12 @@ import React from 'react'
 import { THEMES, FALLBACK_THEME } from '../constants'
 
 export default function GameCard({
-  game, sectionKey, onDetail,
+  game, sectionKey, onDetail, showHours,
   draggable, isDragging, isDropTarget,
   onDragStart, onDragOver, onDrop, onDragEnd,
 }) {
   const theme = THEMES[sectionKey] || FALLBACK_THEME
+  const hoursLabel = showHours && game.hoursPlayed != null ? `${game.hoursPlayed}h` : null
 
   const className = [
     'game-card',
@@ -41,6 +42,9 @@ export default function GameCard({
             <div className="card-cover-placeholder">🎮</div>
           )
         }
+
+        {/* Hours overlay — only while the section is sorted by hours played */}
+        {hoursLabel && <span className="card-hours-badge">{hoursLabel}</span>}
       </div>
     </div>
   )

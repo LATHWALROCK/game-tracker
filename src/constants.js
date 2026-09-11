@@ -15,3 +15,9 @@ export const HOURS_SECTIONS = ['played', 'multiplayer', 'abandoned']
 export const NOW_PLAYING_SECTIONS = ['wishlist']
 
 export const canBeNowPlaying = (sectionKey) => NOW_PLAYING_SECTIONS.includes(sectionKey)
+
+// Only these sections get the sort dropdown; everything else stays in the
+// manual, drag-to-reorder order with no control shown.
+export const SORTABLE_SECTIONS = ['played']
+
+export const isSortable = (sectionKey) => SORTABLE_SECTIONS.includes(sectionKey)
