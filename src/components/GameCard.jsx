@@ -7,7 +7,7 @@ export default function GameCard({
   onDragStart, onDragOver, onDrop, onDragEnd,
 }) {
   const theme = THEMES[sectionKey] || FALLBACK_THEME
-  const hoursLabel = showHours && game.hoursPlayed != null ? `${game.hoursPlayed}h` : null
+  const hours = showHours && game.hoursPlayed != null ? game.hoursPlayed : null
 
   const className = [
     'game-card',
@@ -44,7 +44,11 @@ export default function GameCard({
         }
 
         {/* Hours overlay — only while the section is sorted by hours played */}
-        {hoursLabel && <span className="card-hours-badge">{hoursLabel}</span>}
+        {hours != null && (
+          <span className="card-hours-badge" aria-label={`${hours} hours played`}>
+            {hours}<span className="card-hours-unit">h</span>
+          </span>
+        )}
       </div>
     </div>
   )
