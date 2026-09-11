@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { THEMES, FALLBACK_THEME, HOURS_SECTIONS, canBeNowPlaying } from '../constants'
+import Cover from './Cover'
+import { useOverlayClose } from '../hooks/useOverlayClose'
 
-export default function DetailModal({ isOpen, game, sectionKey, onClose, onEdit, onDelete, onTogglePlaying }) {
+export default function DetailModal({ isOpen, game, sectionKey, sectionLabel, onClose, onEdit, onDelete, onTogglePlaying }) {
   const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const overlayProps = useOverlayClose(onClose)
 
   useEffect(() => { setConfirmingDelete(false) }, [isOpen, game])
 
@@ -14,37 +17,29 @@ export default function DetailModal({ isOpen, game, sectionKey, onClose, onEdit,
   const isPlaying = showPlayingToggle && !!game.currentlyPlaying
 
   return (
-    <div
-      className="modal-overlay"
-      onClick={e => { if (e.target === e.currentTarget) onClose() }}
-    >
+    <div className="modal-overlay" {...overlayProps}>
       <div className="modal modal--detail">
 
-        <div className="detail-layout">
+        {/* Hero: the cover doubles as its own blurred backdrop */}
+        <div className="detail-hero">
+          {game.cover && (
+            <img className="detail-backdrop" src={game.cover} alt="" aria-hidden="true"
+                 referrerPolicy="no-referrer" />
+          )}
+          <div className="detail-scrim" aria-hidden="true" />
 
-          {/* Cover — square */}
-          <div className="detail-cover-wrap">
-            {game.cover
-              ? (
-                <img
-                  src={game.cover}
-                  alt={game.name}
-                  className="detail-cover"
-                  onError={e => { e.target.style.display = 'none' }}
-                />
-              ) : (
-                <div className="detail-cover-placeholder">🎮</div>
-              )
-            }
-          </div>
+          <div className="detail-hero-body">
+            <div className="detail-cover-wrap">
+              <Cover
+                src={game.cover}
+                alt={game.name}
+                className="detail-cover"
+                placeholderClassName="detail-cover-placeholder"
+              />
+            </div>
 
-          {/* Info */}
-          <div className="detail-info">
-
-            {/* Title */}
             <h2 className="detail-title">{game.name}</h2>
 
-            {/* Badge + Hours row */}
             <div className="detail-meta">
               <span
                 className="detail-badge"
@@ -54,7 +49,8 @@ export default function DetailModal({ isOpen, game, sectionKey, onClose, onEdit,
                   borderColor: theme.color
                 }}
               >
-                {theme.label}
+                {/* From the gist, so it can't drift from the section heading */}
+                {sectionLabel || 'Game'}
               </span>
 
               {showHours && (
@@ -64,9 +60,11 @@ export default function DetailModal({ isOpen, game, sectionKey, onClose, onEdit,
                 </div>
               )}
             </div>
+          </div>
+        </div>
 
-            {/* Divider */}
-            <div className="detail-divider" />
+        <div className="detail-layout">
+          <div className="detail-info">
 
             {/* Actions */}
             <div className="detail-actions">

@@ -1,5 +1,6 @@
 import React from 'react'
 import { THEMES, FALLBACK_THEME } from '../constants'
+import Cover from './Cover'
 
 export default function GameCard({
   game, sectionKey, onDetail, showHours,
@@ -28,20 +29,12 @@ export default function GameCard({
     >
       {/* Cover — square */}
       <div className="card-cover-wrap">
-        {game.cover
-          ? (
-            <img
-              src={game.cover}
-              alt={game.name}
-              className="card-cover"
-              loading="lazy"
-              draggable={false}
-              onError={e => { e.target.style.display = 'none' }}
-            />
-          ) : (
-            <div className="card-cover-placeholder">🎮</div>
-          )
-        }
+        <Cover
+          src={game.cover}
+          alt={game.name}
+          className="card-cover"
+          placeholderClassName="card-cover-placeholder"
+        />
 
         {/* Hours overlay — only while the section is sorted by hours played */}
         {hours != null && (

@@ -39,9 +39,28 @@ html, body, #root {
   border-bottom: 1px solid var(--border);
 }
 .brand {
-  font-size: 1.1rem;
+  font-size: 1.1rem;   /* explicit: it's an h1 now, which has a UA default */
   font-weight: 700;
   letter-spacing: -0.02em;
+}
+.save-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.save-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: save-pulse 1s ease-in-out infinite;
+}
+@keyframes save-pulse {
+  0%, 100% { opacity: 0.35; }
+  50%      { opacity: 1; }
 }
 .nav-actions {
   display: flex;
@@ -83,8 +102,60 @@ html, body, #root {
   margin: 0 auto;
   padding: 2rem 1.25rem;
 }
-.loader     { text-align: center; padding: 4rem 1rem; color: var(--text-muted); font-size: 1rem; }
-.error-text { color: #f87171; }
+/* ── STATE PANELS (error) ───────────────────────────── */
+.state-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  max-width: 26rem;
+  margin: 3rem auto;
+  padding: 1.75rem 1.5rem;
+  text-align: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+.state-panel--error { border-color: rgba(239,68,68,0.35); }
+.state-panel-icon   { font-size: 1.75rem; line-height: 1; }
+.state-panel-title  { font-size: 0.98rem; font-weight: 700; }
+.state-panel-text   { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.35rem; }
+
+/* ── SKELETON (first load) ──────────────────────────── */
+.sk {
+  display: block;
+  border-radius: var(--radius);
+  background: linear-gradient(
+    90deg,
+    var(--surface) 25%,
+    var(--surface2) 37%,
+    var(--surface) 63%
+  );
+  background-size: 400% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+.sk-tile { width: 42px; height: 42px; border-radius: 13px; flex: 0 0 auto; }
+.sk-line { height: 0.8rem; border-radius: 5px; }
+.sk-line--title { width: 9rem; height: 1.15rem; }
+.sk-line--sub   { width: 4.5rem; height: 0.6rem; }
+/* Matches the real grid's square cards, so nothing shifts when data lands */
+.sk-card { width: 100%; aspect-ratio: 1 / 1; border-radius: var(--radius-lg); }
+
+@keyframes shimmer {
+  from { background-position: 100% 0; }
+  to   { background-position: 0 0; }
+}
+
+/* ── SCREEN-READER ONLY ─────────────────────────────── */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
 
 /* ── NOW PLAYING ────────────────────────────────────── */
 .now-playing {
@@ -116,56 +187,101 @@ html, body, #root {
   .now-playing-heading { font-size: 1.15rem; }
   .now-playing-icon    { width: 36px; height: 36px; font-size: 0.85rem; border-radius: 11px; }
 }
+/* One panel per playing game: full-width alone, tiling in pairs, stacking on phones */
 .now-playing-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 0.85rem;
-  overflow-x: auto;
-  padding-bottom: 0.25rem;
 }
-.now-playing-item {
-  flex: 0 0 110px;
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  cursor: pointer;
-}
-.now-playing-cover-wrap {
-  width: 110px;
-  aspect-ratio: 1 / 1;
-  border-radius: var(--radius-lg);
+
+.np-panel {
+  position: relative;
   overflow: hidden;
-  background: var(--surface2);
+  border-radius: var(--radius-lg);
   border: 1.5px solid var(--accent);
-  box-shadow: 0 0 12px var(--accent-dim);
+  box-shadow: 0 0 14px var(--accent-dim);
+  background: var(--surface2);
+  cursor: pointer;
   transition: transform var(--transition), box-shadow var(--transition);
 }
-.now-playing-item:hover .now-playing-cover-wrap {
-  transform: translateY(-3px);
-  box-shadow: 0 0 18px var(--accent-dim);
+.np-panel:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 22px var(--accent-dim), var(--shadow);
 }
-.now-playing-cover {
+
+/* The cover art doubles as its own backdrop. scale() past the edges so the
+   blur doesn't bleed transparent pixels into the corners. */
+.np-backdrop {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
+  transform: scale(1.15);
+  filter: blur(24px) saturate(1.3);
+  opacity: 0.75;
 }
-.now-playing-cover-placeholder {
-  width: 100%;
-  height: 100%;
+.np-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, rgba(10,10,14,0.88) 0%, rgba(10,10,14,0.62) 100%);
+}
+
+.np-body {
+  position: relative;   /* above backdrop + scrim */
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 0.9rem;
+  padding: 0.85rem;
+  min-width: 0;
+}
+.np-cover-wrap {
+  flex: 0 0 auto;
+  width: 96px;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--surface2);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+}
+.np-cover { width: 100%; height: 100%; object-fit: cover; display: block; }
+.np-cover-placeholder {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
   font-size: 2rem;
   color: var(--text-muted);
 }
-.now-playing-name {
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-align: center;
-  white-space: nowrap;
+
+.np-info { min-width: 0; display: flex; flex-direction: column; gap: 0.45rem; }
+.np-name {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  /* Two lines then ellipsis — long titles shouldn't stretch the panel */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
-  color: var(--text);
+}
+.np-meta { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.np-badge {
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.16rem 0.5rem;
+  border: 1px solid;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.np-hours { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; }
+
+@media (max-width: 480px) {
+  .np-cover-wrap { width: 76px; }
+  .np-name       { font-size: 1rem; }
 }
 
 /* ── STATS PANEL ────────────────────────────────────── */
@@ -353,9 +469,29 @@ html, body, #root {
   .section-sort      { padding: 0.35rem 0.6rem; font-size: 0.74rem; }
 }
 .section-empty {
-  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 2rem 1rem;
+  border: 1px dashed var(--theme-color, var(--border));
+  border-radius: var(--radius-lg);
+  background: var(--theme-border, transparent);
+}
+.section-empty-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  font-size: 1.2rem;
+  border-radius: 13px;
+  background: var(--surface);
+  border: 1px solid var(--theme-color, var(--border));
+}
+.section-empty-text {
   font-size: 0.85rem;
-  padding: 1rem 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
 }
 
 /* ── SELECT (custom dropdown) ───────────────────────── */
@@ -603,6 +739,12 @@ html, body, #root {
   box-shadow: var(--shadow);
   position: relative;
   animation: modal-in 0.18s ease;
+  /* Without this the lower half of the form is unreachable on a short
+     viewport (phone landscape). overscroll-behavior stops iOS from
+     chaining the scroll to the page behind. */
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 @keyframes overlay-in {
   from { opacity: 0; }
@@ -612,7 +754,38 @@ html, body, #root {
   from { opacity: 0; transform: scale(0.96) translateY(4px); }
   to   { opacity: 1; transform: scale(1) translateY(0); }
 }
-.modal--detail { max-width: 500px; }
+.modal--detail { max-width: 500px; padding: 0; overflow: hidden; }
+.modal--form   { max-width: 480px; }
+
+/* ── DETAIL HERO ────────────────────────────────────── */
+.detail-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 1.75rem 1.5rem 1.35rem;
+}
+.detail-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.2);
+  filter: blur(30px) saturate(1.35);
+  opacity: 0.8;
+}
+.detail-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(10,10,14,0.62) 0%, rgba(26,26,36,0.95) 100%);
+}
+.detail-hero-body {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+}
+.modal-close { z-index: 2; }   /* above the hero backdrop */
 .modal-header  { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
 .modal-title   { font-size: 1.1rem; font-weight: 700; }
 .modal-close {
@@ -661,24 +834,61 @@ html, body, #root {
 .form-group input:focus,
 .form-group select:focus { border-color: var(--accent); }
 .form-error { color: #f87171; font-size: 0.78rem; }
-
-/* ── DETAIL MODAL ───────────────────────────────────── */
-/* ── DETAIL MODAL ───────────────────────────────────── */
-.detail-layout {
-  display: flex;
-  flex-direction: column;   /* ✅ Always column — same on all screen sizes */
-  gap: 1.25rem;
-  align-items: center;      /* ✅ Center everything */
+.form-optional {
+  font-size: 0.66rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: none;
+  letter-spacing: 0;
+  opacity: 0.8;
+  margin-left: 0.3rem;
 }
 
-/* ✅ Square cover in detail modal */
+/* Preview beside the URL field, so a bad paste is obvious before saving */
+.cover-field {
+  display: flex;
+  align-items: stretch;
+  gap: 0.6rem;
+}
+.cover-field input { flex: 1 1 auto; min-width: 0; }
+.cover-preview {
+  flex: 0 0 auto;
+  width: 72px;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+}
+.cover-preview-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cover-preview-placeholder {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  font-size: 1.5rem;
+  color: var(--text-muted);
+}
+
+/* ── DETAIL MODAL ───────────────────────────────────── */
+/* ── DETAIL MODAL ───────────────────────────────────── */
+/* Actions area below the hero */
+.detail-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  align-items: center;
+  padding: 1.25rem 1.5rem 1.5rem;
+}
+
 .detail-cover-wrap {
-  width: 160px;             /* ✅ Slightly bigger on desktop too */
+  width: 132px;
   flex-shrink: 0;
   border-radius: var(--radius);
   overflow: hidden;
   background: var(--surface2);
   aspect-ratio: 1 / 1;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.55);
 }
 .detail-cover {
   width: 100%;
@@ -779,25 +989,12 @@ html, body, #root {
 
 /* ── DETAIL RESPONSIVE (phone) ──────────────────────── */
 @media (max-width: 480px) {
-  .detail-layout {
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-  }
-  .detail-cover-wrap {
-    width: 120px;
-  }
-  .detail-info {
-    width: 100%;
-    padding-top: 0;
-  }
-  .detail-title {
-    text-align: center;
-    font-size: 1rem;
-  }
-  .detail-meta {
-    justify-content: center;
-  }
+  .detail-hero   { padding: 1.4rem 1.1rem 1.15rem; }
+  .detail-layout { gap: 1rem; padding: 1.1rem; }
+  .detail-cover-wrap { width: 108px; }
+  .detail-info   { width: 100%; padding-top: 0; }
+  .detail-title  { text-align: center; font-size: 1rem; }
+  .detail-meta   { justify-content: center; }
 }
 
 /* ── TOAST ──────────────────────────────────────────── */
@@ -826,3 +1023,17 @@ html, body, #root {
 .toast--error   { border-color: rgba(239,68,68,0.4); }
 .toast--info    { border-color: rgba(59,130,246,0.4); }
 .toast-icon     { font-size: 0.9rem; font-weight: 700; }
+
+/* ── REDUCED MOTION ─────────────────────────────────── */
+/* The app has six keyframe animations plus transforms on every card. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .game-card:hover,
+  .np-panel:hover { transform: none; }
+  .sk { background: var(--surface2); }
+}

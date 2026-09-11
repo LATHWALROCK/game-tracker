@@ -4,7 +4,7 @@ import Select from './Select'
 import { THEMES, FALLBACK_THEME, isSortable } from '../constants'
 import { SORT_MODES, sortGames, arrayMove } from '../utils/gameOrdering'
 
-export default function GameSection({ sectionKey, section, onEdit, onDelete, onDetail, onReorder }) {
+export default function GameSection({ sectionKey, section, onDelete, onDetail, onReorder, onAddToSection }) {
   const theme = THEMES[sectionKey] || FALLBACK_THEME
   const games = section.games || []
   const showSort = isSortable(sectionKey)
@@ -66,7 +66,11 @@ export default function GameSection({ sectionKey, section, onEdit, onDelete, onD
       </header>
 
       {games.length === 0 ? (
-        <p className="section-empty">No games yet. Add one!</p>
+        <div className="section-empty" style={{ '--theme-color': theme.color, '--theme-border': theme.border }}>
+          <span className="section-empty-icon" aria-hidden="true">{section.icon}</span>
+          <p className="section-empty-text">No games in {section.label} yet</p>
+          <button className="btn btn-ghost" onClick={onAddToSection}>+ Add a game</button>
+        </div>
       ) : (
         <div className="cards-grid">
           {displayGames.map((game, idx) => (
