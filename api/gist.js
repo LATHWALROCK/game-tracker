@@ -1,5 +1,5 @@
-const GIST_ID   = process.env.GIST_ID;
-const GH_TOKEN  = process.env.GH_TOKEN;
+const GIST_ID = process.env.GIST_ID;
+const GH_TOKEN = process.env.GH_TOKEN;
 const GIST_FILE = process.env.GIST_FILE || 'games.json';
 
 export default async function handler(req, res) {
@@ -20,7 +20,7 @@ export default async function handler(req, res) {
       return res.status(response.status).json({ error: `GitHub API error: ${response.status}` });
     }
     const json = await response.json();
-    const raw  = json.files?.[GIST_FILE]?.content;
+    const raw = json.files?.[GIST_FILE]?.content;
     if (!raw) {
       return res.status(404).json({ error: `File "${GIST_FILE}" not found in Gist` });
     }
