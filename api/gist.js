@@ -1,8 +1,8 @@
-const GIST_ID = process.env.GIST_ID;
-const GH_TOKEN = process.env.GH_TOKEN;
-const GIST_FILE = process.env.GIST_FILE || 'games.json';
-
 export default async function handler(req, res) {
+  const GIST_ID = process.env.GIST_ID;
+  const GH_TOKEN = process.env.GH_TOKEN;
+  const GIST_FILE = process.env.GIST_FILE || 'games.json';
+
   if (!GIST_ID || !GH_TOKEN) {
     return res.status(500).json({ error: 'Server misconfigured: missing GIST_ID or GH_TOKEN env vars' });
   }
