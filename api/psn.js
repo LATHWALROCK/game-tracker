@@ -8,36 +8,123 @@ import {
   getUserTrophyProfileSummary
 } from 'psn-api'
 
-const SESSION_FILE = path.join(process.cwd(), '.psn-session.json')
+const GIST_ID = process.env.GIST_ID
+const GH_TOKEN = process.env.GH_TOKEN
+const PSN_GIST_FILE = 'psn_session.json'
+const LOCAL_SESSION_FILE = path.join(process.cwd(), '.psn-session.json')
+const TMP_SESSION_FILE = '/tmp/.psn-session.json'
 
-function loadSession() {
-  try {
-    if (fs.existsSync(SESSION_FILE)) {
-      const data = JSON.parse(fs.readFileSync(SESSION_FILE, 'utf8'))
-      if (data && data.refreshToken) return data
-    }
-  } catch (e) {
-    console.error('[PSN Session Load Error]', e.message)
+let memorySession = null
+
+async function loadSession() {
+  if (memorySession?.refreshToken) {
+    return memorySession
   }
+
+  // 1. Try loading from GitHub Gist if configured (e.g. on Vercel production)
+  if (GIST_ID && GH_TOKEN) {
+    try {
+      const res = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+        headers: {
+          'Authorization': `Bearer ${GH_TOKEN}`,
+          'Accept': 'application/vnd.github+json'
+        }
+      })
+      if (res.ok) {
+        const json = await res.json()
+        const raw = json.files?.[PSN_GIST_FILE]?.content
+        if (raw) {
+          const parsed = JSON.parse(raw)
+          if (parsed && parsed.refreshToken) {
+            memorySession = parsed
+            return parsed
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('[PSN Gist Load Warning]', e.message)
+    }
+  }
+
+  // 2. Try loading from local file system (local dev or lambda /tmp)
+  for (const file of [LOCAL_SESSION_FILE, TMP_SESSION_FILE]) {
+    try {
+      if (fs.existsSync(file)) {
+        const data = JSON.parse(fs.readFileSync(file, 'utf8'))
+        if (data && data.refreshToken) {
+          memorySession = data
+          return data
+        }
+      }
+    } catch (_) {}
+  }
+
   return null
 }
 
-function saveSession(data) {
+async function saveSession(data) {
+  memorySession = data
+
+  // 1. Save to GitHub Gist if configured (persists permanently across Vercel deployments & cold starts)
+  if (GIST_ID && GH_TOKEN) {
+    try {
+      await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${GH_TOKEN}`,
+          'Accept': 'application/vnd.github+json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          files: {
+            [PSN_GIST_FILE]: {
+              content: JSON.stringify(data, null, 2)
+            }
+          }
+        })
+      })
+    } catch (e) {
+      console.error('[PSN Gist Save Error]', e.message)
+    }
+  }
+
+  // 2. Save locally if filesystem allows
   try {
-    fs.writeFileSync(SESSION_FILE, JSON.stringify(data, null, 2), 'utf8')
-  } catch (e) {
-    console.error('[PSN Session Save Error]', e.message)
+    fs.writeFileSync(LOCAL_SESSION_FILE, JSON.stringify(data, null, 2), 'utf8')
+  } catch (_) {
+    try {
+      fs.writeFileSync(TMP_SESSION_FILE, JSON.stringify(data, null, 2), 'utf8')
+    } catch (_) {}
   }
 }
 
-function clearSession() {
-  try {
-    if (fs.existsSync(SESSION_FILE)) {
-      fs.unlinkSync(SESSION_FILE)
+async function clearSession() {
+  memorySession = null
+
+  // 1. Delete from GitHub Gist if configured
+  if (GIST_ID && GH_TOKEN) {
+    try {
+      await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${GH_TOKEN}`,
+          'Accept': 'application/vnd.github+json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          files: {
+            [PSN_GIST_FILE]: null
+          }
+        })
+      })
+    } catch (e) {
+      console.error('[PSN Gist Clear Error]', e.message)
     }
-  } catch (e) {
-    console.error('[PSN Session Clear Error]', e.message)
   }
+
+  // 2. Clear local files
+  try { if (fs.existsSync(LOCAL_SESSION_FILE)) fs.unlinkSync(LOCAL_SESSION_FILE) } catch (_) {}
+  try { if (fs.existsSync(TMP_SESSION_FILE)) fs.unlinkSync(TMP_SESSION_FILE) } catch (_) {}
 }
 
 function parsePlayDuration(duration) {
@@ -50,7 +137,7 @@ function parsePlayDuration(duration) {
 }
 
 async function getAuthorization(npssoInput) {
-  let session = loadSession()
+  let session = await loadSession()
 
   // 1. Try to refresh existing token if present
   if (session?.refreshToken) {
@@ -63,7 +150,7 @@ async function getAuthorization(npssoInput) {
         expiresAt: Date.now() + (auth.expiresIn * 1000),
         lastRefreshedAt: new Date().toISOString()
       }
-      saveSession(session)
+      await saveSession(session)
       return { authorization: { accessToken: auth.accessToken }, session }
     } catch (refreshErr) {
       console.warn('[PSN] Refresh token renewal failed:', refreshErr.message)
@@ -97,7 +184,7 @@ async function getAuthorization(npssoInput) {
     expiresAt: Date.now() + (auth.expiresIn * 1000),
     savedAt: new Date().toISOString()
   }
-  saveSession(session)
+  await saveSession(session)
 
   return { authorization: { accessToken: auth.accessToken }, session }
 }
@@ -105,7 +192,14 @@ async function getAuthorization(npssoInput) {
 export default async function handler(req, res) {
   // GET: Return current session status
   if (req.method === 'GET') {
-    const session = loadSession()
+    let session = await loadSession()
+    if (!session && process.env.PSN_NPSSO) {
+      try {
+        const authResult = await getAuthorization()
+        session = authResult?.session
+      } catch (_) {}
+    }
+
     if (session?.refreshToken) {
       return res.status(200).json({
         loggedIn: true,
@@ -125,13 +219,13 @@ export default async function handler(req, res) {
 
   // Action: LOGOUT
   if (action === 'logout') {
-    clearSession()
+    await clearSession()
     return res.status(200).json({ loggedIn: false, message: 'Logged out successfully' })
   }
 
   // Action: STATUS
   if (action === 'status') {
-    const session = loadSession()
+    const session = await loadSession()
     return res.status(200).json({
       loggedIn: !!session?.refreshToken,
       onlineId: session?.onlineId || null
@@ -211,7 +305,7 @@ export default async function handler(req, res) {
       message.toLowerCase().includes('401')
 
     if (isAuth) {
-      clearSession()
+      await clearSession()
     }
 
     return res.status(isAuth ? 401 : 500).json({

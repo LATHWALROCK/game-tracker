@@ -252,13 +252,14 @@ export default function SplitGameModal({ isOpen, bundleGame, library, onClose, o
       prev.map((item, i) => {
         if (i !== idx) return item
         if (!libGame) {
-          return { ...item, name: '', cover: '', sectionKey: defaultSectionKey }
+          return { ...item, name: '', cover: '', sectionKey: defaultSectionKey, idx: null }
         }
         return {
           ...item,
           name: libGame.name,
           cover: libGame.cover || '',
-          sectionKey: libGame.sectionKey || item.sectionKey
+          sectionKey: libGame.sectionKey || item.sectionKey,
+          idx: libGame.idx
         }
       })
     )
@@ -302,6 +303,7 @@ export default function SplitGameModal({ isOpen, bundleGame, library, onClose, o
         name: g.name.trim(),
         hours: g.hours !== '' ? Number(g.hours) : undefined,
         sectionKey: g.sectionKey,
+        idx: g.idx != null ? g.idx : undefined,
         cover: g.cover || bundleGame.cover || ''
       }))
     }

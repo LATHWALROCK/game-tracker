@@ -785,6 +785,9 @@ export default function PsnSyncModal({ isOpen, library, onClose, onApprove }) {
                               {item.diffHours > 0 && (
                                 <span className="psn-diff-delta">+{item.diffHours}h</span>
                               )}
+                              {item.diffHours < 0 && (
+                                <span className="psn-diff-delta psn-diff-delta--negative">{item.diffHours}h</span>
+                              )}
                               {item.updateCover && (
                                 <span className="psn-cover-updated-tag">Art found</span>
                               )}
@@ -841,16 +844,16 @@ export default function PsnSyncModal({ isOpen, library, onClose, onApprove }) {
                             onClick={() => {
                               setSplitModal({
                                 open: true,
-                                bundleGame: {
-                                  name: titleName,
-                                  hoursPlayed: hoursNum,
+                                bundleGame: item.originalPsnGame || {
+                                  name: item.fromBundle || titleName,
+                                  hoursPlayed: item.originalPsnGame?.hoursPlayed || hoursNum,
                                   cover: item.cover || ''
                                 }
                               })
                             }}
-                            title="Divide this collection into multiple separate games"
+                            title={item.fromBundle ? `Edit collection split for "${item.fromBundle}"` : 'Divide this collection into multiple separate games'}
                           >
-                            ✂️ Split Collection
+                            ✂️ {item.fromBundle ? `Edit Split (${item.fromBundle})` : 'Split Collection'}
                           </button>
 
                           <button

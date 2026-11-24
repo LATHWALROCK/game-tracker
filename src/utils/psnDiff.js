@@ -18,11 +18,30 @@ export function normalizeTitle(title) {
 
 /**
  * Searches the user's library for an existing game matching the PSN title.
+ * Uses a two-pass algorithm:
+ *   Pass 1: Exact normalized title match across the library.
+ *   Pass 2: Fuzzy substring match ONLY when sequel/version numbers align.
  */
 export function findMatchingGame(library, psnTitle) {
   if (!library || typeof library !== 'object') return null
   const normPSN = normalizeTitle(psnTitle)
   if (!normPSN) return null
+
+  // Pass 1: Exact normalized title match across all sections
+  for (const [sectionKey, section] of Object.entries(library)) {
+    if (sectionKey.startsWith('_') || !section?.games) continue
+    const games = section.games || []
+    for (let idx = 0; idx < games.length; idx++) {
+      const game = games[idx]
+      if (normalizeTitle(game.name) === normPSN) {
+        return { sectionKey, idx, game }
+      }
+    }
+  }
+
+  // Pass 2: Fuzzy substring match (guarding against sequel mismatch, e.g. Hitman vs Hitman 2)
+  const psnNumberMatch = normPSN.match(/\d+$/)
+  const psnNumber = psnNumberMatch ? psnNumberMatch[0] : null
 
   for (const [sectionKey, section] of Object.entries(library)) {
     if (sectionKey.startsWith('_') || !section?.games) continue
@@ -32,8 +51,13 @@ export function findMatchingGame(library, psnTitle) {
       const normLib = normalizeTitle(game.name)
       if (!normLib) continue
 
+      const libNumberMatch = normLib.match(/\d+$/)
+      const libNumber = libNumberMatch ? libNumberMatch[0] : null
+
+      // Do not fuzzy match if one has a sequel/number and the other does not or has a different number!
+      if (psnNumber !== libNumber) continue
+
       if (
-        normLib === normPSN ||
         (normPSN.length >= 6 && normLib.includes(normPSN)) ||
         (normLib.length >= 6 && normPSN.includes(normLib))
       ) {
@@ -83,7 +107,23 @@ export function generatePsnDiff(library, psnGames) {
     // 2. Check if title is mapped as SPLIT (collection divided into multiple games)
     if (mapping?.type === 'split' && Array.isArray(mapping.games)) {
       for (const sub of mapping.games) {
-        const subMatch = findMatchingGame(library, sub.name)
+        // Direct match if sectionKey and idx are valid and game name matches
+        let subMatch = null
+        if (
+          sub.sectionKey &&
+          sub.idx != null &&
+          library[sub.sectionKey]?.games?.[sub.idx] &&
+          normalizeTitle(library[sub.sectionKey].games[sub.idx].name) === normalizeTitle(sub.name)
+        ) {
+          subMatch = {
+            sectionKey: sub.sectionKey,
+            idx: sub.idx,
+            game: library[sub.sectionKey].games[sub.idx]
+          }
+        } else {
+          subMatch = findMatchingGame(library, sub.name)
+        }
+
         const targetHours = sub.hours != null ? Number(sub.hours) : 0
         const key = subMatch
           ? `match:${subMatch.sectionKey}:${subMatch.idx}`
@@ -159,24 +199,34 @@ export function generatePsnDiff(library, psnGames) {
     if (item.match) {
       const currentHours = item.match.game.hoursPlayed || 0
       const psnHours = maxHours
-      const hoursChanged = psnHours > currentHours && (psnHours - currentHours) >= 0.1
+      const hoursDiff = Math.round((psnHours - currentHours) * 10) / 10
+
+      // If item was divided from a collection, the user explicitly allocated its hours.
+      // Any difference (even if hours decreased, e.g. 23.1h -> 7.7h) triggers an UPDATE_HOURS change.
+      const hoursChanged = item.isSplit
+        ? Math.abs(hoursDiff) >= 0.05
+        : (psnHours > currentHours && hoursDiff >= 0.1)
+
+      const sectionChanged = item.isSplit && item.targetSection && item.targetSection !== item.match.sectionKey
       const coverMissing = !item.match.game.cover && !!item.cover
 
-      if (hoursChanged || coverMissing) {
+      if (hoursChanged || sectionChanged || coverMissing) {
         changes.push({
           id: `update-${item.match.sectionKey}-${item.match.game.name}`,
           type: 'UPDATE_HOURS',
           sectionKey: item.match.sectionKey,
+          targetSection: item.targetSection || item.match.sectionKey,
           idx: item.match.idx,
           gameName: item.match.game.name,
           cover: item.match.game.cover || item.cover,
           currentHours,
           newHours: psnHours,
-          diffHours: Math.round((psnHours - currentHours) * 10) / 10,
+          diffHours: hoursDiff,
           sumHours: sumHours > psnHours ? sumHours : null,
           versions: item.versions,
           hasMultipleVersions,
           fromBundle: item.fromBundle || null,
+          isSplit: item.isSplit || false,
           updateCover: coverMissing ? item.cover : null,
           selected: true,
           originalPsnGame: item.originalPsnGame
@@ -198,6 +248,7 @@ export function generatePsnDiff(library, psnGames) {
           versions: item.versions,
           hasMultipleVersions,
           fromBundle: item.fromBundle || null,
+          isSplit: item.isSplit || false,
           selected: false,
           originalPsnGame: item.originalPsnGame
         })
@@ -215,6 +266,7 @@ export function generatePsnDiff(library, psnGames) {
         versions: item.versions,
         hasMultipleVersions,
         fromBundle: item.fromBundle || null,
+        isSplit: item.isSplit || false,
         selected: true,
         originalPsnGame: item.originalPsnGame
       })
@@ -241,8 +293,10 @@ export function applyApprovedChanges(library, approvedChanges, updatedMappings) 
     if (change.type === 'UPDATE_HOURS') {
       const section = next[change.sectionKey]
       if (section && section.games) {
-        let game = section.games[change.idx]
-        if (!game || normalizeTitle(game.name) !== normalizeTitle(change.gameName)) {
+        let game = null
+        if (section.games[change.idx] && normalizeTitle(section.games[change.idx].name) === normalizeTitle(change.gameName)) {
+          game = section.games[change.idx]
+        } else {
           game = section.games.find(g => normalizeTitle(g.name) === normalizeTitle(change.gameName))
         }
 
@@ -250,6 +304,15 @@ export function applyApprovedChanges(library, approvedChanges, updatedMappings) 
           game.hoursPlayed = change.newHours
           if (change.updateCover && !game.cover) {
             game.cover = change.updateCover
+          }
+
+          // Move section if targetSection was changed (e.g. from split modal)
+          if (change.targetSection && change.targetSection !== change.sectionKey && next[change.targetSection]?.games) {
+            const curIdx = section.games.indexOf(game)
+            if (curIdx !== -1) {
+              section.games.splice(curIdx, 1)
+              next[change.targetSection].games.push(game)
+            }
           }
         }
       }
