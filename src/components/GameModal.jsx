@@ -99,7 +99,7 @@ export default function GameModal({ isOpen, mode, sections, editData, presetSect
 
           <div className="form-group">
             <label htmlFor="gm-hours">Hours Played <span className="form-optional">optional</span></label>
-            <input id="gm-hours" type="number" min="0" step="0.5" value={hoursPlayed}
+            <input id="gm-hours" type="number" min="0" step="any" value={hoursPlayed}
                    onChange={e => setHours(e.target.value)} placeholder="e.g. 42" />
           </div>
 
