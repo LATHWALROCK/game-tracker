@@ -14,17 +14,16 @@ export const THEMES = {
 
 export const FALLBACK_THEME = { color: '#7c3aed', border: 'rgba(124,58,237,0.2)' }
 
-export const HOURS_SECTIONS = ['played', 'multiplayer', 'abandoned']
+// All games across all sections support tracking hours played
+export const allowsHours = () => true
 
-// Only games in these sections can be marked as "currently playing" — the
-// Now Playing row is meant for what you're working through off the wishlist,
-// not for games already played or ongoing multiplayer titles.
-export const NOW_PLAYING_SECTIONS = ['wishlist']
+// Legacy array for backward compatibility
+export const HOURS_SECTIONS = ['played', 'wishlist', 'bought', 'multiplayer', 'abandoned', 'backlog']
+
+// Only games in these sections can be marked as "currently playing"
+export const NOW_PLAYING_SECTIONS = ['wishlist', 'bought', 'backlog']
 
 export const canBeNowPlaying = (sectionKey) => NOW_PLAYING_SECTIONS.includes(sectionKey)
 
-// Only these sections get the sort dropdown; everything else stays in the
-// manual, drag-to-reorder order with no control shown.
-export const SORTABLE_SECTIONS = ['played']
-
-export const isSortable = (sectionKey) => SORTABLE_SECTIONS.includes(sectionKey)
+// Any section can be sorted by hours or manual order
+export const isSortable = () => true

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { THEMES, FALLBACK_THEME, HOURS_SECTIONS, canBeNowPlaying } from '../constants'
+import { THEMES, FALLBACK_THEME, canBeNowPlaying } from '../constants'
 import Cover from './Cover'
 import { useOverlayClose } from '../hooks/useOverlayClose'
 
@@ -12,7 +12,7 @@ export default function DetailModal({ isOpen, game, sectionKey, sectionLabel, on
   if (!isOpen || !game) return null
 
   const theme = THEMES[sectionKey] || FALLBACK_THEME
-  const showHours = HOURS_SECTIONS.includes(sectionKey) && game.hoursPlayed != null
+  const showHours = game.hoursPlayed != null
   const showPlayingToggle = canBeNowPlaying(sectionKey)
   const isPlaying = showPlayingToggle && !!game.currentlyPlaying
 

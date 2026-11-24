@@ -27,3 +27,6 @@ pnpm-debug.log*
 Thumbs.db
 .vscode/
 .idea/
+
+# PlayStation persistent session
+.psn-session.json

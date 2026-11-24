@@ -72,21 +72,38 @@ html, body, #root {
 .btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  justify-content: center;
+  gap: 0.45rem;
   padding: 0.45rem 1rem;
   border-radius: var(--radius);
   font-size: 0.85rem;
   font-weight: 600;
+  height: 36px;
+  line-height: 1;
+  box-sizing: border-box;
   cursor: pointer;
   border: none;
-  transition: opacity var(--transition), background var(--transition);
+  transition: opacity var(--transition), background var(--transition), transform var(--transition);
 }
-.btn:hover   { opacity: 0.85; }
+.btn:hover   { opacity: 0.9; }
 .btn:active  { transform: scale(0.97); }
 .btn-primary { background: var(--accent); color: #fff; }
 .btn-ghost   { background: var(--surface2); color: var(--text); }
 .btn-danger  { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
-.btn-icon    { padding: 0.45rem 0.7rem; }
+
+/* Official PlayStation brand button */
+.btn-psn {
+  background: #00439c;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+.btn-psn:hover {
+  background: #0056cc;
+}
+.ps-logo {
+  flex-shrink: 0;
+  display: block;
+}
 
 .btn:focus-visible,
 .modal-close:focus-visible,
@@ -1036,4 +1053,957 @@ html, body, #root {
   .game-card:hover,
   .np-panel:hover { transform: none; }
   .sk { background: var(--surface2); }
+}
+
+
+/* ── PLAYSTATION SYNC MODAL ─────────────────────────── */
+.modal--psn-sync {
+  width: 100%;
+  max-width: 580px;
+  padding: 1.5rem;
+  transition: max-width 0.2s ease;
+}
+.modal--psn-sync-wide {
+  max-width: 940px;
+  width: 94vw;
+}
+.psn-header-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.modal-subtitle {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+.psn-badge-icon {
+  margin-right: 0.4rem;
+}
+.psn-error-banner {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #fca5a5;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius);
+  display: flex;
+  gap: 0.6rem;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+  align-items: flex-start;
+}
+.psn-link {
+  color: var(--accent);
+  text-decoration: underline;
+  word-break: break-all;
+}
+.psn-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+}
+.psn-checkbox-label input {
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.psn-step-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  text-align: center;
+  gap: 0.75rem;
+}
+.psn-spinner {
+  width: 38px;
+  height: 38px;
+  border: 3px solid rgba(255, 255, 255, 0.12);
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: psn-spin 0.8s linear infinite;
+}
+@keyframes psn-spin {
+  to { transform: rotate(360deg); }
+}
+.psn-loading-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+.psn-loading-sub {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* ── PSN REVIEW TOOLBAR & FILTERS ───────────────────── */
+.psn-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem;
+  padding-bottom: 0.85rem;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.psn-search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 220px;
+  max-width: 360px;
+}
+.psn-search-icon {
+  position: absolute;
+  left: 0.75rem;
+  color: var(--text-muted);
+  pointer-events: none;
+  font-size: 0.82rem;
+}
+.psn-search-input {
+  width: 100%;
+  padding: 0.48rem 1.85rem 0.48rem 2.1rem;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 0.82rem;
+  outline: none;
+  transition: all var(--transition);
+}
+.psn-search-input:focus {
+  border-color: var(--accent);
+  background: var(--surface);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+}
+.psn-search-clear {
+  position: absolute;
+  right: 0.65rem;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 0.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.psn-search-clear:hover {
+  color: var(--text);
+}
+
+/* ── SEGMENTED FILTER TABS ──────────────────────────── */
+.psn-filter-tabs {
+  display: flex;
+  gap: 0.25rem;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 3px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  overflow-x: auto;
+}
+.psn-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 500;
+  padding: 0.35rem 0.7rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+.psn-tab:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.04);
+}
+.psn-tab--active {
+  background: var(--surface2);
+  color: var(--text);
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.psn-tab-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.1rem 0.4rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
+}
+.psn-tab--active .psn-tab-badge {
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--text);
+}
+.psn-tab-badge--new {
+  background: rgba(34, 197, 94, 0.15) !important;
+  color: #4ade80 !important;
+}
+.psn-tab-badge--update {
+  background: rgba(59, 130, 246, 0.15) !important;
+  color: #60a5fa !important;
+}
+.psn-tab-badge--uptodate {
+  background: rgba(16, 185, 129, 0.18) !important;
+  color: #34d399 !important;
+}
+
+/* ── SUB-BAR / ACTIONS & FILTERS ────────────────────── */
+.psn-sub-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+.psn-sub-info {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+.psn-sub-count strong {
+  color: var(--text);
+}
+.psn-selected-pill {
+  color: var(--text-muted);
+}
+.psn-selected-pill strong {
+  color: #a78bfa;
+}
+.psn-action-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.psn-btn-group {
+  display: flex;
+  border-radius: 6px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.psn-btn-group .btn-tiny {
+  border: none;
+  border-radius: 0;
+  padding: 0.25rem 0.55rem;
+  font-size: 0.74rem;
+}
+.psn-btn-group .btn-tiny + .btn-tiny {
+  border-left: 1px solid var(--border);
+}
+.psn-chip-group {
+  display: flex;
+  gap: 0.35rem;
+}
+.psn-toggle-chip {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.74rem;
+  font-weight: 500;
+  padding: 0.24rem 0.55rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all var(--transition);
+  display: inline-flex;
+  align-items: center;
+}
+.psn-toggle-chip:hover {
+  color: var(--text);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+.psn-toggle-chip--active {
+  background: rgba(124, 58, 237, 0.15);
+  border-color: rgba(124, 58, 237, 0.45);
+  color: #c4b5fd;
+  font-weight: 600;
+}
+.psn-rules-btn {
+  white-space: nowrap;
+}
+.psn-batch-section-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--surface2);
+  padding: 0.15rem 0.4rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+.psn-batch-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.psn-select--batch {
+  padding: 0.2rem 0.4rem;
+  font-size: 0.74rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+/* ── CHANGES GRID (WIDE) ────────────────────────────── */
+.psn-changes-list {
+  max-height: 480px;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 0.75rem;
+  padding-right: 0.25rem;
+}
+.psn-change-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.75rem 0.9rem;
+  transition: border-color var(--transition), background var(--transition);
+}
+.psn-change-card--selected {
+  border-color: rgba(124, 58, 237, 0.6);
+  background: rgba(124, 58, 237, 0.08);
+}
+.psn-change-card--uptodate {
+  border-color: rgba(16, 185, 129, 0.22);
+  background: rgba(16, 185, 129, 0.03);
+}
+.psn-change-card--uptodate:hover {
+  border-color: rgba(16, 185, 129, 0.4);
+}
+.psn-card-check--uptodate {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: #34d399;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  cursor: default;
+}
+.psn-card-check input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.psn-card-cover {
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--surface);
+}
+.psn-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.psn-thumb-placeholder {
+  width: 100%;
+  height: 100%;
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+}
+.psn-card-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+.psn-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.psn-card-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.psn-type-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  flex-shrink: 0;
+}
+.psn-type-badge--new {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+.psn-type-badge--hours {
+  background: rgba(217, 119, 6, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(217, 119, 6, 0.3);
+}
+.psn-type-badge--uptodate {
+  background: rgba(16, 185, 129, 0.14);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+.psn-diff-row--uptodate {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.psn-hours-synced {
+  font-weight: 600;
+  color: #34d399;
+  font-size: 0.8rem;
+}
+.psn-section-tag {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.1rem 0.35rem;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+.psn-uptodate-text {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+.psn-card-diff {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+.psn-diff-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.psn-diff-hours {
+  font-weight: 500;
+  color: var(--text);
+}
+.psn-hours-old {
+  text-decoration: line-through;
+  opacity: 0.65;
+}
+.psn-arrow {
+  opacity: 0.5;
+}
+.psn-hours-new {
+  font-weight: 600;
+  color: var(--text);
+}
+.psn-diff-delta {
+  color: #4ade80;
+  font-weight: 600;
+  font-size: 0.75rem;
+  background: rgba(34, 197, 94, 0.12);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+}
+.psn-cover-updated-tag {
+  font-size: 0.72rem;
+  color: #60a5fa;
+  background: rgba(59, 130, 246, 0.12);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+}
+.psn-versions-detected {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+  margin-top: 0.2rem;
+  padding: 0.25rem 0.5rem;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  font-size: 0.72rem;
+}
+.psn-version-label {
+  color: var(--text-muted);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.psn-combine-toggle {
+  background: rgba(124, 58, 237, 0.15);
+  border: 1px solid rgba(124, 58, 237, 0.4);
+  color: #c4b5fd;
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition);
+}
+.psn-combine-toggle:hover {
+  background: rgba(124, 58, 237, 0.3);
+  color: #fff;
+}
+.psn-section-picker {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-left: auto;
+}
+.psn-picker-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+.psn-select {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  padding: 0.2rem 0.5rem;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+.psn-select:focus {
+  outline: 2px solid var(--accent);
+}
+.psn-empty-state {
+  padding: 3rem 1rem;
+  text-align: center;
+}
+.psn-empty-icon {
+  font-size: 2.2rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+.psn-empty-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+.psn-empty-text {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+.psn-footer-right {
+  display: flex;
+  gap: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .modal--psn-sync-wide {
+    width: 96vw;
+    padding: 1.25rem 1rem;
+  }
+  .psn-changes-list {
+    grid-template-columns: 1fr;
+    max-height: 400px;
+  }
+  .psn-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.65rem;
+  }
+  .psn-search-box {
+    max-width: 100%;
+  }
+  .psn-filter-tabs {
+    overflow-x: auto;
+    width: 100%;
+  }
+  .psn-sub-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .psn-action-controls {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+
+/* ── PSN PERSISTENT LOGIN & CONNECTED STATE ──────────── */
+.psn-connected-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+}
+.psn-connected-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(34, 197, 94, 0.12);
+  color: #4ade80;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.85rem;
+}
+.psn-connected-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+  animation: save-pulse 1.5s infinite;
+}
+.psn-user-row {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 0.75rem;
+}
+.psn-avatar-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #00439c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: #fff;
+  flex-shrink: 0;
+  box-shadow: 0 4px 14px rgba(0, 67, 156, 0.45);
+}
+.psn-user-details {
+  display: flex;
+  flex-direction: column;
+}
+.psn-user-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.psn-user-sub {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+.psn-connected-desc {
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+.psn-login-intro {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+.psn-login-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-bottom: 0.85rem;
+}
+.psn-step-item {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.75rem 0.9rem;
+}
+.psn-step-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #0070d1;
+  flex-shrink: 0;
+}
+.psn-step-desc {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+
+/* ── SPLIT GAME & MAPPINGS MODAL ─────────────────────── */
+.modal--split-game {
+  width: 100%;
+  max-width: 680px;
+  padding: 1.5rem;
+}
+.split-icon {
+  margin-right: 0.35rem;
+}
+.split-hours-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.65rem 0.85rem;
+  margin-bottom: 1rem;
+}
+.split-hours-stat {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+.split-hours-label {
+  color: var(--text-muted);
+}
+.split-hours-val {
+  font-weight: 700;
+  color: var(--accent);
+}
+.split-games-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  max-height: 340px;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+.split-game-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.65rem;
+}
+.split-row-num {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  width: 16px;
+  text-align: center;
+}
+.split-col-title {
+  flex: 1;
+  min-width: 0;
+}
+.split-input {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  padding: 0.4rem 0.65rem;
+  font-size: 0.82rem;
+  font-family: inherit;
+}
+.split-input:focus {
+  outline: 2px solid var(--accent);
+}
+.split-col-hours {
+  position: relative;
+  width: 82px;
+  display: flex;
+  align-items: center;
+}
+.split-input--hours {
+  padding-right: 1.25rem;
+}
+.split-hours-unit {
+  position: absolute;
+  right: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+.split-col-section {
+  width: 135px;
+}
+.split-select {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  padding: 0.4rem 0.55rem;
+  font-size: 0.78rem;
+  font-family: inherit;
+  cursor: pointer;
+}
+.split-del-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  padding: 0.35rem 0.5rem;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all var(--transition);
+}
+.split-del-btn:hover:not(:disabled) {
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.12);
+}
+.split-del-btn:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+.split-add-btn-wrap {
+  margin-top: 0.75rem;
+}
+
+/* ── PSN CARD ACTIONS BAR ────────────────────────────── */
+.psn-card-actions-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.35rem;
+}
+.psn-action-btn {
+  padding: 0.2rem 0.5rem;
+  font-size: 0.72rem;
+  border-radius: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.psn-action-btn:hover {
+  background: var(--surface2);
+}
+.psn-action-btn--ignore {
+  color: var(--text-muted);
+}
+.psn-action-btn--ignore:hover {
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.35);
+  background: rgba(239, 68, 68, 0.08);
+}
+.psn-from-bundle-tag {
+  font-size: 0.7rem;
+  color: #c084fc;
+  background: rgba(168, 85, 247, 0.12);
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  align-self: flex-start;
+  margin-top: 0.15rem;
+}
+
+/* ── MAPPINGS MANAGER MODAL ─────────────────────────── */
+.modal--mappings-manager {
+  width: 100%;
+  max-width: 660px;
+  padding: 1.5rem;
+}
+.mappings-list {
+  max-height: 380px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding-right: 0.25rem;
+}
+.mapping-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.75rem 0.95rem;
+}
+.mapping-card-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.mapping-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+.mapping-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.mapping-badge--split {
+  background: rgba(168, 85, 247, 0.15);
+  color: #c084fc;
+  border: 1px solid rgba(168, 85, 247, 0.3);
+}
+.mapping-badge--ignore {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+.mapping-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.mapping-subgames {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+}
+.mapping-sub-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+.mapping-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+.mapping-sub-tag {
+  font-size: 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  color: var(--text);
 }

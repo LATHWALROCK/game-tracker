@@ -1,13 +1,11 @@
 import React from 'react'
-import { canBeNowPlaying, THEMES, FALLBACK_THEME, HOURS_SECTIONS } from '../constants'
+import { canBeNowPlaying, THEMES, FALLBACK_THEME } from '../constants'
 import Cover from './Cover'
 
 export default function NowPlaying({ data, onDetail }) {
   const items = []
   for (const [sectionKey, section] of Object.entries(data)) {
-    // Sections that can't be "now playing" are skipped entirely, so a stale
-    // flag left on an older game doesn't resurface in the row.
-    if (!canBeNowPlaying(sectionKey)) continue
+    if (sectionKey.startsWith('_') || !section?.games || !canBeNowPlaying(sectionKey)) continue
     const games = section.games || []
     games.forEach((game, idx) => {
       if (game.currentlyPlaying) items.push({ sectionKey, idx, game, label: section.label })
@@ -25,7 +23,7 @@ export default function NowPlaying({ data, onDetail }) {
       <div className="now-playing-row">
         {items.map(({ sectionKey, idx, game, label }) => {
           const theme = THEMES[sectionKey] || FALLBACK_THEME
-          const showHours = HOURS_SECTIONS.includes(sectionKey) && game.hoursPlayed != null
+          const showHours = game.hoursPlayed != null
 
           return (
             <div

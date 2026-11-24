@@ -13,7 +13,8 @@ export default defineConfig(({ mode }) => {
         name: 'api-serverless-middleware',
         configureServer(server) {
           server.middlewares.use(async (req, res, next) => {
-            if (req.url && req.url.startsWith('/api/gist')) {
+            const pathname = req.url ? req.url.split('?')[0] : ''
+            if (pathname === '/api/gist' || pathname === '/api/psn') {
               try {
                 // Collect and parse request body for POST requests
                 if (req.method === 'POST') {
@@ -38,8 +39,13 @@ export default defineConfig(({ mode }) => {
                   return res
                 }
 
-                const { default: handler } = await import('./api/gist.js')
-                await handler(req, res)
+                if (pathname === '/api/gist') {
+                  const { default: handler } = await import('./api/gist.js')
+                  await handler(req, res)
+                } else if (pathname === '/api/psn') {
+                  const { default: handler } = await import('./api/psn.js')
+                  await handler(req, res)
+                }
               } catch (err) {
                 console.error('[local-api-error]', err)
                 res.statusCode = 500

@@ -8,18 +8,21 @@ import StatsPanel from './components/StatsPanel'
 import GameSection from './components/GameSection'
 import GameModal from './components/GameModal'
 import DetailModal from './components/DetailModal'
+import PsnSyncModal from './components/PsnSyncModal'
 import Skeleton from './components/Skeleton'
 import Toast from './components/Toast'
+import { applyApprovedChanges } from './utils/psnDiff'
 
 export default function App() {
   const { data, loading, error, saving, loadGames, saveGames } = useGames()
   const { toast, showToast } = useToast()
 
-  // Game modal state. `presetSection` pre-selects a section when the add flow is
-  // launched from an empty section panel.
+  // Game modal state
   const [gameModal, setGameModal] = useState({ open: false, mode: 'add', editData: null, presetSection: null })
   // Detail modal state
   const [detailModal, setDetailModal] = useState({ open: false, game: null, sectionKey: null, idx: null })
+  // PlayStation Sync modal state
+  const [psnModalOpen, setPsnModalOpen] = useState(false)
 
   useEffect(() => { loadGames() }, [loadGames])
 
@@ -46,14 +49,12 @@ export default function App() {
 
     // Spread the original so fields this function doesn't know about survive.
     const updated = { ...newData[from].games[idx], name, cover }
-    // Clearing the hours input must still remove the key.
     if (hoursPlayed === undefined) delete updated.hoursPlayed
     else updated.hoursPlayed = hoursPlayed
-    // Moving a game into a section that can't be "now playing" drops the flag.
     if (!canBeNowPlaying(section)) delete updated.currentlyPlaying
 
     if (section === from) {
-      newData[section].games[idx] = updated      // in place — manual order preserved
+      newData[section].games[idx] = updated
     } else {
       newData[from].games.splice(idx, 1)
       newData[section].games.push(updated)
@@ -83,7 +84,6 @@ export default function App() {
   }, [data, saveGames, showToast])
 
   // REORDER GAMES WITHIN A SECTION (drag-and-drop)
-  // Debounced: a burst of drags paints instantly but sends one PATCH.
   const handleReorder = useCallback(async (sectionKey, newGames) => {
     const newData = structuredClone(data)
     newData[sectionKey].games = newGames
@@ -109,11 +109,25 @@ export default function App() {
     }
   }, [data, saveGames, showToast])
 
+  // APPLY MANUALLY APPROVED PSN CHANGES
+  const handlePsnApprove = useCallback(async (approvedChanges, updatedMappings) => {
+    if ((!approvedChanges || approvedChanges.length === 0) && !updatedMappings) return
+    const updatedData = applyApprovedChanges(data, approvedChanges, updatedMappings)
+    try {
+      await saveGames(updatedData)
+      const count = approvedChanges ? approvedChanges.length : 0
+      showToast(`PlayStation sync applied! (${count} ${count === 1 ? 'change' : 'changes'})`, 'success')
+    } catch (e) {
+      showToast(e.message, 'error')
+    }
+  }, [data, saveGames, showToast])
+
   return (
     <>
       <Navbar
         saving={saving}
         onAddGame={() => setGameModal({ open: true, mode: 'add', editData: null, presetSection: null })}
+        onSyncPsn={() => setPsnModalOpen(true)}
       />
 
       <main className="main-content">
@@ -135,7 +149,9 @@ export default function App() {
               onDetail={(game, sectionKey, idx) => setDetailModal({ open: true, game, sectionKey, idx })}
             />
             <StatsPanel data={data} />
-            {Object.entries(data).map(([key, section]) => (
+            {Object.entries(data)
+              .filter(([key, section]) => !key.startsWith('_') && section && Array.isArray(section.games))
+              .map(([key, section]) => (
               <GameSection
                 key={key}
                 sectionKey={key}
@@ -178,6 +194,13 @@ export default function App() {
         }}
         onDelete={() => handleDelete(detailModal.sectionKey, detailModal.idx)}
         onTogglePlaying={() => handleTogglePlaying(detailModal.sectionKey, detailModal.idx)}
+      />
+
+      <PsnSyncModal
+        isOpen={psnModalOpen}
+        library={data}
+        onClose={() => setPsnModalOpen(false)}
+        onApprove={handlePsnApprove}
       />
 
       <Toast message={toast.msg} type={toast.type} visible={toast.visible} />

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import { HOURS_SECTIONS } from '../constants'
 import Select from './Select'
 import Cover from './Cover'
 import { useOverlayClose } from '../hooks/useOverlayClose'
@@ -29,9 +28,10 @@ export default function GameModal({ isOpen, mode, sections, editData, presetSect
 
   if (!isOpen) return null
 
-  const showHours = HOURS_SECTIONS.includes(section)
   const sectionOptions = sections
-    ? Object.entries(sections).map(([key, sec]) => ({ value: key, label: `${sec.icon} ${sec.label}` }))
+    ? Object.entries(sections)
+        .filter(([key, sec]) => !key.startsWith('_') && sec?.games)
+        .map(([key, sec]) => ({ value: key, label: `${sec.icon} ${sec.label}` }))
     : []
 
   // Cover is optional — the placeholder renders properly now.
@@ -45,8 +45,12 @@ export default function GameModal({ isOpen, mode, sections, editData, presetSect
     e.preventDefault()
     const errs = validate()
     if (Object.keys(errs).length > 0) { setErrors(errs); return }
-    onSubmit({ section, name: name.trim(), cover: cover.trim(),
-      hoursPlayed: showHours && hoursPlayed !== '' ? Number(hoursPlayed) : undefined })
+    onSubmit({
+      section,
+      name: name.trim(),
+      cover: cover.trim(),
+      hoursPlayed: hoursPlayed !== '' ? Number(hoursPlayed) : undefined
+    })
   }
 
   return (
@@ -93,13 +97,11 @@ export default function GameModal({ isOpen, mode, sections, editData, presetSect
             </div>
           </div>
 
-          {showHours && (
-            <div className="form-group">
-              <label htmlFor="gm-hours">Hours Played</label>
-              <input id="gm-hours" type="number" min="0" step="0.5" value={hoursPlayed}
-                     onChange={e => setHours(e.target.value)} placeholder="e.g. 42" />
-            </div>
-          )}
+          <div className="form-group">
+            <label htmlFor="gm-hours">Hours Played <span className="form-optional">optional</span></label>
+            <input id="gm-hours" type="number" min="0" step="0.5" value={hoursPlayed}
+                   onChange={e => setHours(e.target.value)} placeholder="e.g. 42" />
+          </div>
 
           <div className="modal-footer">
             <button type="button" className="btn btn-ghost" onClick={onClose}>Cancel</button>
