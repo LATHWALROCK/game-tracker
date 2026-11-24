@@ -271,15 +271,46 @@ export default async function handler(req, res) {
     }
 
     const { authorization, session } = authResult
-    const limit = Number(body.limit) || 50
+    const targetLimit = Number(body.limit) || 800
+    const pageSize = 100
+    const allTitles = []
+    let offset = 0
+    let totalAvailable = null
 
-    const response = await getUserPlayedGames(authorization, 'me', {
-      limit: Math.min(limit, 100),
-      categories: 'ps4_game,ps5_native_game,pspc_game'
-    })
+    // Page through all available played games on PlayStation Network
+    while (allTitles.length < targetLimit) {
+      const fetchLimit = Math.min(pageSize, targetLimit - allTitles.length)
+      const response = await getUserPlayedGames(authorization, 'me', {
+        limit: fetchLimit,
+        offset,
+        categories: 'ps4_game,ps5_native_game,pspc_game,unknown'
+      })
 
-    const titles = response?.titles || []
-    const games = titles.map(t => ({
+      const pageTitles = response?.titles || []
+      if (pageTitles.length === 0) break
+
+      allTitles.push(...pageTitles)
+
+      if (typeof response.totalItemCount === 'number') {
+        totalAvailable = response.totalItemCount
+      }
+
+      if (response.nextOffset != null && response.nextOffset > offset) {
+        offset = response.nextOffset
+      } else {
+        offset += pageTitles.length
+      }
+
+      // Reached the end of the user's library
+      if (
+        (totalAvailable != null && allTitles.length >= totalAvailable) ||
+        pageTitles.length < fetchLimit
+      ) {
+        break
+      }
+    }
+
+    const games = allTitles.map(t => ({
       titleId: t.titleId,
       name: t.name,
       cover: t.imageUrl || '',

@@ -66,6 +66,7 @@ export default function PsnSyncModal({ isOpen, library, onClose, onApprove }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'sync',
+          limit: 1000,
           npsso: npsso.trim() ? npsso.trim() : undefined
         })
       })
@@ -438,7 +439,7 @@ export default function PsnSyncModal({ isOpen, library, onClose, onApprove }) {
           <div className="psn-step-loading">
             <div className="psn-spinner" aria-hidden="true" />
             <p className="psn-loading-title">Connecting to PlayStation Network…</p>
-            <p className="psn-loading-sub">Fetching your played games and recorded hours</p>
+            <p className="psn-loading-sub">Fetching your full PlayStation game history and recorded hours…</p>
           </div>
         )}
 
